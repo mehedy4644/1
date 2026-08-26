@@ -1,108 +1,124 @@
-
 (function () {
   "use strict";
+
+  /* =========================================================
+     MEHEDY SCRIPT
+     ========================================================= */
 
   const DBG = {
     enabled: true,
 
     log: function (tag, message) {
       if (!this.enabled) return;
-      console.log("[" + tag + "] " + message);
+      console.log("[MEHEDY:" + tag + "] " + message);
     },
 
     warn: function (tag, message) {
       if (!this.enabled) return;
-      console.warn("[" + tag + "] " + message);
+      console.warn("[MEHEDY:" + tag + "] " + message);
     },
 
     error: function (tag, message) {
-      console.error("[" + tag + "] " + message);
+      console.error("[MEHEDY:" + tag + "] " + message);
     }
   };
 
-  if (typeof window.MEHEDY_BOOKMARK_LOAD === "undefined") {
-    console.log("Bookmark Required");
+
+  /* =========================================================
+     BOOKMARK CHECK
+     ========================================================= */
+
+  if (window.MEHEDY_BOOKMARK_LOAD !== true) {
+    DBG.warn(
+      "ACCESS",
+      "MEHEDY_BOOKMARK_LOAD is not enabled."
+    );
     return;
   }
 
-  // বাকি আপনার script...
-})();
 
-(function () {
-  "use strict";
-
-  // =========================================================
-  // DEBUG
-  // =========================================================
-
-  const DBG = {
-    enabled: true,
-
-    log(tag, message) {
-      if (!this.enabled) return;
-      console.log(`[${tag}] ${message}`);
-    },
-
-    warn(tag, message) {
-      if (!this.enabled) return;
-      console.warn(`[${tag}] ${message}`);
-    },
-
-    error(tag, message) {
-      console.error(`[${tag}] ${message}`);
-    }
-  };
-
-
-  // =========================================================
-  // CONFIG
-  // =========================================================
+  /* =========================================================
+     CONFIG
+     ========================================================= */
 
   const CONFIG = {
-    // GitHub থেকে Key
+
     keyUrl:
       "https://raw.githubusercontent.com/mehedy4644/1/main/key.txt",
 
-    // GitHub থেকে Telegram link
     telegramUrl:
       "https://raw.githubusercontent.com/mehedy4644/1/main/button.txt",
 
-    // আপনার API — redirect-এর জন্য
-    apiBaseUrl:
-      "https://lol.a2mbd3.workers.dev",
+    logoUrl:
+      "https://raw.githubusercontent.com/mehedy4644/1/main/logo.png",
 
     musicUrl:
       "https://raw.githubusercontent.com/mehedy4644/1/main/music.mp3",
 
-    logoUrl:
-      "https://raw.githubusercontent.com/mehedy4644/1/main/logo.png"
+    apiBaseUrl:
+      "https://lol.a2mbd3.workers.dev"
   };
 
 
-  // =========================================================
-  // FETCH TEXT
-  // =========================================================
+  /* =========================================================
+     HELPERS
+     ========================================================= */
+
+  function getElement(id) {
+    return document.getElementById(id);
+  }
+
+
+  function setStatus(message, type) {
+
+    const el = getElement("mehedy-status");
+
+    if (!el) return;
+
+    el.textContent = message;
+
+    if (type === "success") {
+      el.style.color = "#00ffcc";
+    } else if (type === "error") {
+      el.style.color = "#ff4d4d";
+    } else {
+      el.style.color = "#94a3b8";
+    }
+  }
+
 
   async function fetchText(url, name) {
 
-    DBG.log("FETCH", `Loading ${name}`);
+    DBG.log(
+      "FETCH",
+      "Loading " + name
+    );
 
-    const response = await fetch(url, {
-      method: "GET",
-      cache: "no-store"
-    });
+    const separator =
+      url.indexOf("?") >= 0 ? "&" : "?";
+
+    const response = await fetch(
+      url + separator + "t=" + Date.now(),
+      {
+        method: "GET",
+        cache: "no-store"
+      }
+    );
 
     if (!response.ok) {
       throw new Error(
-        `${name}: HTTP ${response.status}`
+        name +
+        " HTTP " +
+        response.status
       );
     }
 
-    const text = (await response.text()).trim();
+    const text =
+      (await response.text()).trim();
 
     if (!text) {
       throw new Error(
-        `${name}: empty response`
+        name + " is empty"
       );
     }
 
@@ -110,59 +126,20 @@
   }
 
 
-  // =========================================================
-  // LOAD GITHUB DATA
-  // =========================================================
+  /* =========================================================
+     TELEGRAM URL
+     ========================================================= */
 
-  async function loadGithubData() {
-
-    const result = {
-      key: "",
-      telegram: ""
-    };
-
-    try {
-      result.key = await fetchText(
-        CONFIG.keyUrl,
-        "GitHub Key"
-      );
-    } catch (error) {
-      DBG.error(
-        "GITHUB",
-        error.message
-      );
-    }
-
-    try {
-      result.telegram = await fetchText(
-        CONFIG.telegramUrl,
-        "GitHub Telegram"
-      );
-    } catch (error) {
-      DBG.error(
-        "GITHUB",
-        error.message
-      );
-    }
-
-    return result;
-  }
-
-
-  // =========================================================
-  // TELEGRAM URL VALIDATION
-  // =========================================================
-
-  function normalizeTelegramUrl(value) {
+  function validTelegramUrl(value) {
 
     const url =
       String(value || "").trim();
 
     if (
-      url.startsWith("https://t.me/") ||
-      url.startsWith("http://t.me/") ||
-      url.startsWith("https://telegram.me/") ||
-      url.startsWith("http://telegram.me/")
+      url.indexOf("https://t.me/") === 0 ||
+      url.indexOf("http://t.me/") === 0 ||
+      url.indexOf("https://telegram.me/") === 0 ||
+      url.indexOf("http://telegram.me/") === 0
     ) {
       return url;
     }
@@ -171,208 +148,113 @@
   }
 
 
-  // =========================================================
-  // API URL
-  // =========================================================
+  /* =========================================================
+     LOAD GITHUB CONFIG
+     ========================================================= */
 
-  function getApiUrl(path) {
+  async function loadConfig() {
 
-    const base =
-      CONFIG.apiBaseUrl.replace(/\/+$/, "");
-
-    const cleanPath =
-      String(path || "")
-        .replace(/^\/+/, "");
-
-    return `${base}/${cleanPath}`;
-  }
+    const result = {
+      keys: [],
+      telegram: ""
+    };
 
 
-  // =========================================================
-  // REDIRECT API
-  // =========================================================
-
-  async function getRedirectUrl(
-    path,
-    params = {}
-  ) {
-
-    const requestUrl =
-      new URL(getApiUrl(path));
-
-    Object.entries(params).forEach(
-      ([key, value]) => {
-
-        if (
-          value !== undefined &&
-          value !== null
-        ) {
-          requestUrl.searchParams.set(
-            key,
-            String(value)
-          );
-        }
-
-      }
-    );
-
-
-    DBG.log(
-      "API",
-      "Requesting redirect URL"
-    );
-
-
-    const response =
-      await fetch(
-        requestUrl.toString(),
-        {
-          method: "GET",
-          cache: "no-store",
-          headers: {
-            "Accept":
-              "application/json"
-          }
-        }
-      );
-
-
-    if (!response.ok) {
-
-      throw new Error(
-        `Redirect API: HTTP ${response.status}`
-      );
-    }
-
-
-    const data =
-      await response.json();
-
-
-    if (
-      !data ||
-      typeof data.url !== "string"
-    ) {
-
-      throw new Error(
-        "API did not return a valid URL"
-      );
-    }
-
-
-    const redirectUrl =
-      data.url.trim();
-
-
-    if (!redirectUrl) {
-
-      throw new Error(
-        "Redirect URL is empty"
-      );
-    }
-
-
-    return redirectUrl;
-  }
-
-
-  // =========================================================
-  // REDIRECT
-  // =========================================================
-
-  async function redirectFromApi(
-    path,
-    params = {}
-  ) {
+    /* -------------------------
+       KEY
+       ------------------------- */
 
     try {
 
-      const redirectUrl =
-        await getRedirectUrl(
-          path,
-          params
+      const rawKey =
+        await fetchText(
+          CONFIG.keyUrl,
+          "GitHub key.txt"
         );
 
 
+      result.keys =
+        rawKey
+          .split(/\r?\n/)
+          .map(function (x) {
+            return x.trim();
+          })
+          .filter(function (x) {
+            return x.length > 0;
+          });
+
+
       DBG.log(
-        "REDIRECT",
-        "Redirecting"
+        "KEY",
+        result.keys.length +
+        " key(s) loaded"
       );
-
-
-      window.location.assign(
-        redirectUrl
-      );
-
 
     } catch (error) {
 
       DBG.error(
-        "REDIRECT",
+        "KEY",
         error.message
       );
+    }
 
 
-      showStatus(
-        "REDIRECT FAILED",
-        "error"
+    /* -------------------------
+       TELEGRAM
+       ------------------------- */
+
+    try {
+
+      const rawTelegram =
+        await fetchText(
+          CONFIG.telegramUrl,
+          "GitHub button.txt"
+        );
+
+
+      result.telegram =
+        validTelegramUrl(
+          rawTelegram
+        );
+
+
+      if (!result.telegram) {
+
+        throw new Error(
+          "Invalid Telegram URL"
+        );
+      }
+
+
+      DBG.log(
+        "TELEGRAM",
+        "Telegram URL loaded"
+      );
+
+    } catch (error) {
+
+      DBG.error(
+        "TELEGRAM",
+        error.message
       );
     }
+
+
+    return result;
   }
 
 
-  // =========================================================
-  // STATUS
-  // =========================================================
-
-  function showStatus(
-    message,
-    type = "normal"
-  ) {
-
-    const element =
-      document.getElementById(
-        "mehedy-status"
-      );
-
-
-    if (!element) return;
-
-
-    element.textContent =
-      message;
-
-
-    if (type === "success") {
-
-      element.style.color =
-        "#00ffcc";
-
-    } else if (type === "error") {
-
-      element.style.color =
-        "#ff4444";
-
-    } else {
-
-      element.style.color =
-        "#64748b";
-    }
-  }
-
-
-  // =========================================================
-  // UI
-  // =========================================================
+  /* =========================================================
+     CREATE UI
+     ========================================================= */
 
   function createUI() {
 
-    if (
-      document.getElementById(
-        "mehedy-auth-box"
-      )
-    ) {
-      return;
+    const old =
+      getElement("mehedy-auth-box");
+
+    if (old) {
+      old.remove();
     }
 
 
@@ -380,64 +262,201 @@
       document.createElement("style");
 
 
+    style.id =
+      "mehedy-style";
+
+
     style.textContent = `
-      #mehedy-auth-box {
-        position:fixed;
-        top:50%;
-        left:50%;
-        transform:translate(-50%,-50%);
-        width:300px;
-        padding:25px;
-        box-sizing:border-box;
-        background:#060a17;
-        color:#fff;
-        border:2px solid #00ffcc;
-        border-radius:16px;
-        z-index:2147483647;
-        font-family:system-ui,sans-serif;
-        text-align:center;
-        box-shadow:0 20px 50px rgba(0,0,0,.6);
+
+      @keyframes mehedyGlow {
+
+        0% {
+          box-shadow:
+            0 0 5px #00ffcc,
+            0 0 10px #00ffcc;
+        }
+
+        50% {
+          box-shadow:
+            0 0 20px #00ffcc,
+            0 0 40px #00ffcc;
+        }
+
+        100% {
+          box-shadow:
+            0 0 5px #00ffcc,
+            0 0 10px #00ffcc;
+        }
+
       }
+
+
+      #mehedy-auth-box {
+
+        position: fixed;
+
+        top: 50%;
+        left: 50%;
+
+        transform:
+          translate(-50%, -50%);
+
+        width: 320px;
+        max-width: 90vw;
+
+        padding: 25px;
+
+        box-sizing: border-box;
+
+        background:
+          rgba(6, 10, 23, .97);
+
+        color: #fff;
+
+        border:
+          2px solid #00ffcc;
+
+        border-radius:
+          16px;
+
+        z-index:
+          2147483647;
+
+        font-family:
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+
+        text-align:
+          center;
+
+        animation:
+          mehedyGlow 3s
+          linear infinite;
+
+      }
+
 
       #mehedy-logo {
-        width:100px;
-        height:100px;
-        object-fit:cover;
-        border-radius:15px;
-        margin-bottom:15px;
+
+        width: 110px;
+        height: 110px;
+
+        object-fit: cover;
+
+        border-radius: 16px;
+
+        border:
+          2px solid #00ffcc;
+
+        margin-bottom: 15px;
+
       }
+
 
       #mehedy-key-input {
-        width:100%;
-        box-sizing:border-box;
-        padding:12px;
-        margin:10px 0;
-        border-radius:8px;
-        border:1px solid #00ffcc;
-        background:#070b19;
-        color:#fff;
-        text-align:center;
+
+        width: 100%;
+
+        box-sizing: border-box;
+
+        padding: 12px;
+
+        margin:
+          12px 0;
+
+        border:
+          1px solid
+          rgba(0,255,204,.5);
+
+        border-radius: 8px;
+
+        outline: none;
+
+        background:
+          rgba(0,0,0,.35);
+
+        color: #fff;
+
+        text-align: center;
+
+        font-size: 14px;
+
       }
 
-      .mehedy-btn {
-        width:100%;
-        padding:12px;
-        margin-top:8px;
-        border:0;
-        border-radius:8px;
-        cursor:pointer;
-        font-weight:bold;
+
+      .mehedy-button {
+
+        width: 100%;
+
+        padding: 12px;
+
+        margin-top: 8px;
+
+        border: none;
+
+        border-radius: 8px;
+
+        font-weight: 700;
+
+        cursor: pointer;
+
+        transition:
+          opacity .2s,
+          transform .2s;
+
       }
+
+
+      .mehedy-button:active {
+
+        transform:
+          scale(.98);
+
+      }
+
 
       #mehedy-login-btn {
-        background:#00ffcc;
-        color:#030712;
+
+        background: #00ffcc;
+
+        color: #03110e;
+
       }
 
+
       #mehedy-telegram-btn {
-        background:#229ed9;
-        color:#fff;
+
+        background: #229ed9;
+
+        color: white;
+
       }
+
+
+      #mehedy-telegram-btn:disabled {
+
+        opacity: .45;
+
+        cursor: not-allowed;
+
+      }
+
+
+      #mehedy-status {
+
+        margin-top: 15px;
+
+        min-height: 18px;
+
+        font-size: 12px;
+
+        color: #94a3b8;
+
+      }
+
     `;
 
 
@@ -453,42 +472,59 @@
 
 
     box.innerHTML = `
+
       <img
         id="mehedy-logo"
         src="${CONFIG.logoUrl}"
+        alt="Logo"
       >
 
-      <h3>MEHEDY</h3>
+      <h3
+        style="
+          margin:0;
+          color:#00ffcc;
+          font-size:20px;
+        "
+      >
+        MEHEDY
+      </h3>
 
-      <p>AINCRAD BYPASS</p>
+      <p
+        style="
+          color:#64748b;
+          font-size:11px;
+          letter-spacing:2px;
+        "
+      >
+        AUTHENTICATION
+      </p>
 
       <input
         id="mehedy-key-input"
         type="text"
-        placeholder="ENTER KEY HERE"
+        autocomplete="off"
+        placeholder="ENTER KEY"
       >
 
       <button
         id="mehedy-login-btn"
-        class="mehedy-btn"
+        class="mehedy-button"
       >
         VERIFY KEY
       </button>
 
       <button
         id="mehedy-telegram-btn"
-        class="mehedy-btn"
+        class="mehedy-button"
         disabled
       >
         TELEGRAM
       </button>
 
-      <div
-        id="mehedy-status"
-        style="margin-top:15px"
-      >
+      <div id="mehedy-status">
         Loading...
       </div>
+
     `;
 
 
@@ -496,203 +532,251 @@
   }
 
 
-  // =========================================================
-  // INITIALIZATION
-  // =========================================================
+  /* =========================================================
+     MUSIC
+     ========================================================= */
 
-  async function initialize() {
+  function setupMusic() {
+
+    const audio =
+      document.createElement("audio");
+
+    audio.src =
+      CONFIG.musicUrl;
+
+    audio.loop = true;
+
+    audio.preload = "none";
+
+    window.MEHEDY_AUDIO =
+      audio;
+
+
+    document.addEventListener(
+      "click",
+      function startMusic() {
+
+        audio.play()
+          .catch(function () {});
+
+        document.removeEventListener(
+          "click",
+          startMusic
+        );
+
+      },
+      {
+        once: true
+      }
+    );
+  }
+
+
+  /* =========================================================
+     API REDIRECT
+     ========================================================= */
+
+  async function getRedirectFromApi(
+    endpoint,
+    params
+  ) {
+
+    const base =
+      CONFIG.apiBaseUrl
+        .replace(/\/+$/, "");
+
+
+    const path =
+      String(endpoint || "")
+        .replace(/^\/+/, "");
+
+
+    const url =
+      new URL(
+        base + "/" + path
+      );
+
+
+    if (params) {
+
+      Object.keys(params)
+        .forEach(function (key) {
+
+          const value =
+            params[key];
+
+          if (
+            value !== undefined &&
+            value !== null
+          ) {
+
+            url.searchParams.set(
+              key,
+              String(value)
+            );
+          }
+
+        });
+    }
+
 
     DBG.log(
-      "INIT",
-      "Starting script"
+      "API",
+      "Requesting redirect"
     );
 
 
-    createUI();
-
-
-    const keyInput =
-      document.getElementById(
-        "mehedy-key-input"
-      );
-
-
-    const loginButton =
-      document.getElementById(
-        "mehedy-login-btn"
-      );
-
-
-    const telegramButton =
-      document.getElementById(
-        "mehedy-telegram-btn"
-      );
-
-
-    /*
-     * GitHub data load
-     */
-
-    const github =
-      await loadGithubData();
-
-
-    /*
-     * Telegram link
-     * ONLY GitHub থেকে
-     */
-
-    const telegram =
-      normalizeTelegramUrl(
-        github.telegram
-      );
-
-
-    if (telegram) {
-
-      telegramButton.disabled =
-        false;
-
-      telegramButton.addEventListener(
-        "click",
-        () => {
-
-          window.open(
-            telegram,
-            "_blank",
-            "noopener,noreferrer"
-          );
-
+    const response =
+      await fetch(
+        url.toString(),
+        {
+          method: "GET",
+          cache: "no-store",
+          headers: {
+            "Accept":
+              "application/json"
+          }
         }
       );
 
-      showStatus(
-        "READY",
-        "success"
+
+    if (!response.ok) {
+
+      throw new Error(
+        "API HTTP " +
+        response.status
       );
+    }
 
-    } else {
 
-      showStatus(
-        "TELEGRAM LINK NOT AVAILABLE",
-        "error"
+    const data =
+      await response.json();
+
+
+    if (
+      !data ||
+      typeof data.url !== "string"
+    ) {
+
+      throw new Error(
+        "API response does not contain url"
+      );
+    }
+
+
+    const destination =
+      data.url.trim();
+
+
+    if (!destination) {
+
+      throw new Error(
+        "API returned empty URL"
       );
     }
 
 
     /*
-     * Key data
+     * Redirect destination API থেকেই
+     * এসেছে।
      */
 
-    const validKeys =
-      github.key
-        .split(/\r?\n/)
-        .map(
-          value => value.trim()
-        )
-        .filter(Boolean);
+    return destination;
+  }
 
 
-    /*
-     * Login
-     */
+  async function performRedirect(
+    key
+  ) {
 
-    loginButton.addEventListener(
-      "click",
-      async () => {
+    try {
 
-        const entered =
-          keyInput.value.trim();
-
-
-        if (!entered) {
-
-          showStatus(
-            "ENTER KEY",
-            "error"
-          );
-
-          return;
-        }
+      setStatus(
+        "Getting redirect...",
+        "normal"
+      );
 
 
-        const valid =
-          validKeys.includes(
-            entered
-          );
+      /*
+       * এখানে আপনার নিজের API endpoint।
+       */
 
-
-        if (!valid) {
-
-          showStatus(
-            "INVALID KEY",
-            "error"
-          );
-
-          return;
-        }
-
-
-        showStatus(
-          "KEY VERIFIED",
-          "success"
-        );
-
-
-        /*
-         * Redirect API
-         *
-         * এখানে আপনার নিজের API endpoint
-         * ব্যবহার করুন।
-         */
-
-        await redirectFromApi(
+      const destination =
+        await getRedirectFromApi(
           "redirect",
           {
-            key: entered
+            key: key
           }
         );
 
-      }
-    );
+
+      /*
+       * API থেকে পাওয়া URL-এ redirect।
+       */
+
+      window.location.assign(
+        destination
+      );
 
 
-    DBG.log(
-      "INIT",
-      "Initialization complete"
-    );
+    } catch (error) {
+
+      DBG.error(
+        "REDIRECT",
+        error.message
+      );
+
+
+      setStatus(
+        "REDIRECT FAILED",
+        "error"
+      );
+    }
   }
 
 
-  // =========================================================
-  // START
-  // =========================================================
+  /* =========================================================
+     MAIN
+     ========================================================= */
 
-  if (
-    document.readyState ===
-    "loading"
-  ) {
+  async function main() {
 
-    document.addEventListener(
-      "DOMContentLoaded",
-      initialize
-    );
+    try {
 
-  } else {
-
-    initialize();
-
-  }
+      DBG.log(
+        "INIT",
+        "Starting"
+      );
 
 
-  // =========================================================
-  // GLOBAL EXPORTS
-  // =========================================================
+      createUI();
 
-  window.MEHEDY_CONFIG =
-    CONFIG;
 
-  window.MEHEDY_DEBUG =
-    DBG;
+      setupMusic();
 
-})();
+
+      const keyInput =
+        getElement(
+          "mehedy-key-input"
+        );
+
+
+      const loginButton =
+        getElement(
+          "mehedy-login-btn"
+        );
+
+
+      const telegramButton =
+        getElement(
+          "mehedy-telegram-btn"
+        );
+
+
+      const config =
+        await loadConfig();
+
+
+      /* -------------------------
+         Telegram
+         ----------------
