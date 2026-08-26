@@ -12,7 +12,7 @@
   // ═══════════════════ APP INFO ═══════════════════
   // Credit: Abdullah Al Mamun (@a2mbd3) - a2mbd3.paged.dev
   const APP_NAME = "NEBULA";
-  const APP_VERSION = "24.2";
+  const APP_VERSION = "25.0";
   const APP_FULL_NAME = APP_NAME + " v" + APP_VERSION;
 
   // ═══════════════════ DEBUG LOGGER ═══════════════════
@@ -65,10 +65,10 @@
   };
 
   let USER_ID = 0;
-let directTarget = DIRECT_TARGETS['aincrad'];
+  let directTarget = null;
   
-  if (typeof window.MEHEDY_BOOKMARK_LOAD !== "undefined") {
-    const raw = window.MEHEDY_BOOKMARK_LOAD;
+  if (typeof window.ABDULLAH_BOOKMARK_LOAD !== "undefined") {
+    const raw = window.ABDULLAH_BOOKMARK_LOAD;
     
     // Check if it's a target name string
     if (typeof raw === 'string') {
@@ -105,7 +105,7 @@ let directTarget = DIRECT_TARGETS['aincrad'];
   // Credit: Abdullah Al Mamun (@a2mbd3) - a2mbd3.paged.dev
   let CONFIG = {
     status: 1,
-    musicUrl: "https://raw.githubusercontent.com/mehedy4644/1/main/music.mp3",
+    musicListUrl: "https://raw.githubusercontent.com/A2MBD3/Aincrad/main/assets/music.txt",
     apiBaseUrl: "https://lol.a2mbd3.workers.dev",
     apiKey: "abdullah",
     totpSecret: "DONOTSTOLEBROJCFFVGCDDCXSG",
@@ -122,9 +122,9 @@ let directTarget = DIRECT_TARGETS['aincrad'];
   // Credit: Abdullah Al Mamun (@a2mbd3) - a2mbd3.paged.dev
   const DEFAULT_USER_DATA = {
     id: 0,
-    name: "Ꮇᴇͥʜͣᴇͫᴅƴ",
+    name: "TEAM CRX OFFICIAL",
     password: "0",
-    tgChannel: "0",
+    tgChannel: "t.me/HQcrx",
     banned: 0,
     creator: "@a2mbd3",
     chatId: "",
@@ -1009,7 +1009,7 @@ let directTarget = DIRECT_TARGETS['aincrad'];
       const j = await r.json();
       DBG.log('CONFIG', 'Loaded');
       if (j.status !== undefined) CONFIG.status = j.status;
-      if (j.musicUrl) CONFIG.musicUrl = j.musicUrl;
+      if (j.musicListUrl) CONFIG.musicListUrl = j.musicListUrl;
       if (j.apiBaseUrl) CONFIG.apiBaseUrl = j.apiBaseUrl;
       if (j.apiKey) CONFIG.apiKey = j.apiKey;
       if (j.totpSecret) CONFIG.totpSecret = j.totpSecret;
@@ -1043,12 +1043,19 @@ let directTarget = DIRECT_TARGETS['aincrad'];
     return input.replace(/\s/g, '').toLowerCase() === USER_DATA.password.replace(/\s/g, '').toLowerCase();
   }
 
-async function fetchMusicList() {
-    musicList = [
-        "https://raw.githubusercontent.com/mehedy4644/1/main/music.mp3"
-    ];
-    return true;
-}
+  // Credit: Abdullah Al Mamun (@a2mbd3) - a2mbd3.paged.dev
+  async function fetchMusicList() {
+    // Credit: Abdullah Al Mamun (@a2mbd3) - a2mbd3.paged.dev
+    DBG.log('MUSIC', 'Fetching...');
+    try {
+      const r = await fetch(CONFIG.musicListUrl + "?t=" + Date.now());
+      const t = await r.text();
+      musicList = t.split('\n').map(l => l.trim()).filter(l => l.startsWith('http'));
+      DBG.log('MUSIC', 'Loaded ' + musicList.length + ' tracks');
+      return musicList.length > 0;
+    } catch (e) { DBG.error('MUSIC', e.message); return false; }
+  }
+
   // Credit: Abdullah Al Mamun (@a2mbd3) - a2mbd3.paged.dev
   function getRandomMusic() {
     // Credit: Abdullah Al Mamun (@a2mbd3) - a2mbd3.paged.dev
