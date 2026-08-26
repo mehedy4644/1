@@ -1,815 +1,668 @@
 (function () {
   "use strict";
 
- 
- 
- 
- 
-  if (typeof window.MEHEDY_BOOKMARK_LOAD === "undefined") {
-    console.log(
-      "%cAccess Denied - Bookmark Required",
-      "color:#ff0000;font-size:15px;font-weight:bold"
-    );
-    return;
-  }
- 
- 
- 
- 
+  // =========================================================
+  // DEBUG
+  // =========================================================
+
+  const DBG = {
+    enabled: true,
+
+    log(tag, message) {
+      if (!this.enabled) return;
+      console.log(`[${tag}] ${message}`);
+    },
+
+    warn(tag, message) {
+      if (!this.enabled) return;
+      console.warn(`[${tag}] ${message}`);
+    },
+
+    error(tag, message) {
+      console.error(`[${tag}] ${message}`);
+    }
+  };
+
+
+  // =========================================================
+  // CONFIG
+  // =========================================================
+
   const CONFIG = {
-    k: "https://raw.githubusercontent.com/mehedy4644/1/main/key.txt",
-    r: "https://raw.githubusercontent.com/mehedy4644/1/main/mehedy.txt",
-    t: "https://raw.githubusercontent.com/mehedy4644/1/main/button.txt",
-    m: "https://raw.githubusercontent.com/mehedy4644/1/main/music.mp3",
-    l: "https://raw.githubusercontent.com/mehedy4644/1/main/logo.png",
-    apiBaseUrl: "https://lol.a2mbd3.workers.dev",
-    apiKey: "abdullah",
-    totpSecret: "DONOTSTOLEBROJCFFVGCDDCXSG",
-    s: `position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
-        background:rgba(6,10,23,0.95);backdrop-filter:blur(12px);
-        -webkit-backdrop-filter:blur(12px);color:#fff;padding:30px 25px;
-        border-radius:16px;z-index:2147483647;
-        font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-        text-align:center;box-shadow:0 20px 50px rgba(0,0,0,0.6);
-        border:2px solid #00ffcc;width:300px;box-sizing:border-box;
-        animation: mehedy-lightning-glow 3s linear infinite;`,
+    // GitHub থেকে Key
+    keyUrl:
+      "https://raw.githubusercontent.com/mehedy4644/1/main/key.txt",
+
+    // GitHub থেকে Telegram link
+    telegramUrl:
+      "https://raw.githubusercontent.com/mehedy4644/1/main/button.txt",
+
+    // আপনার API — redirect-এর জন্য
+    apiBaseUrl:
+      "https://lol.a2mbd3.workers.dev",
+
+    musicUrl:
+      "https://raw.githubusercontent.com/mehedy4644/1/main/music.mp3",
+
+    logoUrl:
+      "https://raw.githubusercontent.com/mehedy4644/1/main/logo.png"
   };
 
-// ═══════════════════ TOTP GENERATOR ═══════════════════
-// Credit: Abdullah Al Mamun (@a2mbd3) - a2mbd3.paged.dev
-class TOTPGenerator {
-  // Credit: Abdullah Al Mamun (@a2mbd3) - a2mbd3.paged.dev
-  constructor(secret = 'K4XG2ZRGM5TGM3Q') {
-    this.secret = secret;
-    this.timeStep = 30;
-    this.digits = 6;
-    this._checkCrypto();
-  }
 
-  // Credit: Abdullah Al Mamun (@a2mbd3) - a2mbd3.paged.dev
-  _sha1(msg) {
-    function rotl(n, s) { return (n << s) | (n >>> (32 - s)); }
-    let h0=0x67452301, h1=0xEFCDAB89, h2=0x98BADCFE, h3=0x10325476, h4=0xC3D2E1F0;
+  // =========================================================
+  // FETCH TEXT
+  // =========================================================
 
-    const bits = msg.length * 8;
-    msg.push(0x80);
-    while (msg.length % 64 !== 56) msg.push(0);
-    msg.push(0,0,0,0);
-    for (let i = 3; i >= 0; i--) msg.push((bits >>> (i*8)) & 0xff);
+  async function fetchText(url, name) {
 
-    for (let i = 0; i < msg.length; i += 64) {
-      const w = [];
-      for (let j = 0; j < 16; j++)
-        w[j] = (msg[i+j*4]<<24)|(msg[i+j*4+1]<<16)|(msg[i+j*4+2]<<8)|msg[i+j*4+3];
-      for (let j = 16; j < 80; j++)
-        w[j] = rotl(w[j-3]^w[j-8]^w[j-14]^w[j-16], 1);
+    DBG.log("FETCH", `Loading ${name}`);
 
-      let a=h0, b=h1, c=h2, d=h3, e=h4;
-      for (let j = 0; j < 80; j++) {
-        let f, k;
-        if (j<20){f=(b&c)|((~b)&d);k=0x5A827999;}
-        else if(j<40){f=b^c^d;k=0x6ED9EBA1;}
-        else if(j<60){f=(b&c)|(b&d)|(c&d);k=0x8F1BBCDC;}
-        else{f=b^c^d;k=0xCA62C1D6;}
+    const response = await fetch(url, {
+      method: "GET",
+      cache: "no-store"
+    });
 
-        const temp=(rotl(a,5)+f+e+k+w[j])>>>0;
-        e=d; d=c; c=rotl(b,30); b=a; a=temp;
-      }
-
-      h0=(h0+a)>>>0;
-      h1=(h1+b)>>>0;
-      h2=(h2+c)>>>0;
-      h3=(h3+d)>>>0;
-      h4=(h4+e)>>>0;
+    if (!response.ok) {
+      throw new Error(
+        `${name}: HTTP ${response.status}`
+      );
     }
 
-    const result = [];
-    [h0,h1,h2,h3,h4].forEach(h => {
-      for(let i=3;i>=0;i--) result.push((h>>>(i*8))&0xff);
-    });
+    const text = (await response.text()).trim();
+
+    if (!text) {
+      throw new Error(
+        `${name}: empty response`
+      );
+    }
+
+    return text;
+  }
+
+
+  // =========================================================
+  // LOAD GITHUB DATA
+  // =========================================================
+
+  async function loadGithubData() {
+
+    const result = {
+      key: "",
+      telegram: ""
+    };
+
+    try {
+      result.key = await fetchText(
+        CONFIG.keyUrl,
+        "GitHub Key"
+      );
+    } catch (error) {
+      DBG.error(
+        "GITHUB",
+        error.message
+      );
+    }
+
+    try {
+      result.telegram = await fetchText(
+        CONFIG.telegramUrl,
+        "GitHub Telegram"
+      );
+    } catch (error) {
+      DBG.error(
+        "GITHUB",
+        error.message
+      );
+    }
 
     return result;
   }
 
-  // Credit: Abdullah Al Mamun (@a2mbd3) - a2mbd3.paged.dev
-  async hmacSha1(key, message) {
-    const keyArr = Array.from(key);
-    const msgArr = Array.from(new Uint8Array(message));
 
-    const blockSize = 64;
-    let k = keyArr.length > blockSize ? this._sha1([...keyArr]) : [...keyArr];
-    while (k.length < blockSize) k.push(0);
+  // =========================================================
+  // TELEGRAM URL VALIDATION
+  // =========================================================
 
-    const iPad = k.map(b => b ^ 0x36);
-    const oPad = k.map(b => b ^ 0x5c);
+  function normalizeTelegramUrl(value) {
 
-    const inner = this._sha1([...iPad, ...msgArr]);
-    const outer = this._sha1([...oPad, ...inner]);
+    const url =
+      String(value || "").trim();
 
-    return new Uint8Array(outer);
-  }
-
-  // Credit: Abdullah Al Mamun (@a2mbd3) - a2mbd3.paged.dev
-  _checkCrypto() {
-    this.cryptoAvailable = true;
-    this.cryptoError = null;
-    DBG.log('TOTP', 'Using pure JS HMAC-SHA1 (no crypto.subtle needed)');
-  }
-
-  // Credit: Abdullah Al Mamun (@a2mbd3) - a2mbd3.paged.dev
-  base32ToHex(base32) {
-    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
-    let bits = '';
-    let hex = '';
-
-    base32 = base32.toUpperCase().replace(/=+$/, '');
-
-    for (let i = 0; i < base32.length; i++) {
-      const val = alphabet.indexOf(base32.charAt(i));
-      if (val === -1) throw new Error('Invalid base32 character');
-      bits += val.toString(2).padStart(5, '0');
+    if (
+      url.startsWith("https://t.me/") ||
+      url.startsWith("http://t.me/") ||
+      url.startsWith("https://telegram.me/") ||
+      url.startsWith("http://telegram.me/")
+    ) {
+      return url;
     }
 
-    for (let i = 0; i + 4 <= bits.length; i += 4) {
-      const chunk = bits.substr(i, 4);
-      hex += parseInt(chunk, 2).toString(16);
-    }
-
-    return hex;
+    return "";
   }
 
-  // Credit: Abdullah Al Mamun (@a2mbd3) - a2mbd3.paged.dev
-  async generate(offset = 0) {
-    DBG.log('TOTP', 'generate() called with offset=' + offset);
 
-    const genStart = performance.now();
-    const key = this.base32ToHex(this.secret);
+  // =========================================================
+  // API URL
+  // =========================================================
 
-    const epoch = Math.floor(Date.now() / 1000);
-    const time = Math.floor(epoch / this.timeStep) + offset;
-    DBG.log('TOTP', 'Epoch=' + epoch + ', Time window=' + time);
+  function getApiUrl(path) {
 
-    const msg = new ArrayBuffer(8);
-    const view = new DataView(msg);
-    view.setUint32(4, time, false);
+    const base =
+      CONFIG.apiBaseUrl.replace(/\/+$/, "");
 
-    const hmacKey = new Uint8Array(
-      key.match(/.{2}/g).map(byte => parseInt(byte, 16))
-    );
+    const cleanPath =
+      String(path || "")
+        .replace(/^\/+/, "");
 
-    const hmacResult = await this.hmacSha1(hmacKey, msg);
-
-    const offset_byte = hmacResult[hmacResult.length - 1] & 0xf;
-
-    const binary =
-      ((hmacResult[offset_byte] & 0x7f) << 24) |
-      ((hmacResult[offset_byte + 1] & 0xff) << 16) |
-      ((hmacResult[offset_byte + 2] & 0xff) << 8) |
-      (hmacResult[offset_byte + 3] & 0xff);
-
-    const otp = binary % Math.pow(10, this.digits);
-    const result = otp.toString().padStart(this.digits, '0');
-
-    const genTime = (performance.now() - genStart).toFixed(2);
-    DBG.log('TOTP', 'PIN: ' + result + ' (' + genTime + 'ms)');
-
-    return result;
-  }
-}
-
-  let audioPlayer = null;
- 
- 
- 
- 
-  (async function () {
-    const existingBox = document.getElementById("mehedy-auth-box");
-    if (existingBox) existingBox.remove();
- 
- 
- 
- 
-    const styleEl = document.createElement("style");
-    styleEl.textContent = `
-@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
-      @keyframes mehedy-lightning-glow {
-        0%   { box-shadow: 0 0 5px #00ffcc, 0 0 10px #00ffcc, inset 0 0 5px rgba(0,255,204,0.2);  border-color: #00ffcc; }
-        25%  { box-shadow: 0 0 15px #00e6b8, 0 0 25px #00ffcc, inset 0 0 10px rgba(0,255,204,0.4); border-color: #00e6b8; }
-        30%  { box-shadow: 0 0 8px #00ffcc,  0 0 12px #00ffcc, inset 0 0 6px rgba(0,255,204,0.3);  border-color: #00ffcc; }
-        35%  { box-shadow: 0 0 25px #00ffff, 0 0 40px #00ffcc, inset 0 0 15px rgba(0,255,204,0.5); border-color: #00ffff; }
-        70%  { box-shadow: 0 0 15px #00e6b8, 0 0 25px #00ffcc, inset 0 0 10px rgba(0,255,204,0.4); border-color: #00e6b8; }
-        73%  { box-shadow: 0 0 5px #00ffcc,  0 0 10px #00ffcc, inset 0 0 5px rgba(0,255,204,0.2);  border-color: #00ffcc; }
-        100% { box-shadow: 0 0 5px #00ffcc,  0 0 10px #00ffcc, inset 0 0 5px rgba(0,255,204,0.2);  border-color: #00ffcc; }
-      }
-      @keyframes mehedy-spin {
-        0%   { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-      }
-      @keyframes mehedy-fire-spin {
-        0%   { transform: translate(-50%, -50%) rotate(0deg); }
-        100% { transform: translate(-50%, -50%) rotate(360deg); }
-      }
-      
-      #mehedy-logo-card{
-
-width:120px;
-
-height:120px;
-
-margin:0 auto 18px;
-
-border-radius:16px;
-
-overflow:hidden;
-
-border:2px solid #00ffcc;
-
-animation:mehedy-lightning-glow 3s linear infinite;
-
-box-sizing:border-box;
-
-}
-
-#mehedy-logo{
-
-width:100%;
-
-height:100%;
-
-display:block;
-
-object-fit:cover;
-
-}
-      
-    `;
-    document.head.appendChild(styleEl);
- 
- 
- 
- 
-    const authBox = document.createElement("div");
-    authBox.id = "mehedy-auth-box";
-    authBox.style.cssText = CONFIG.s;
-    authBox.innerHTML = `
-      <button id="mehedy-music-btn" style="
-        position:absolute;top:15px;right:15px;
-        background:rgba(255,255,255,0.05);border:1px solid rgba(0,255,204,0.3);
-        color:#ff4444;border-radius:50%;width:32px;height:32px;
-        cursor:pointer;font-size:14px;display:flex;align-items:center;
-        justify-content:center;box-shadow:0 0 8px rgba(0,0,0,0.3);
-        transition:all 0.3s ease;z-index:10;">🔇</button>
-        
-        <div id="mehedy-logo-card">
-
-<img src="${CONFIG.l}" id="mehedy-logo">
-
-</div>
-
-      <h3 style="margin:0 0 6px 0;color:#00ffcc;font-size:20px;letter-spacing:1.5px;
-                 font-weight:800;text-shadow:0 0 12px rgba(0,255,204,0.5);">
-        Ꮇᴇͥʜͣᴇͫᴅƴ
-      </h3>
-      <p style="margin:0 0 20px 0;color:#64748b;font-size:11px;letter-spacing:2px;font-weight:600;">
-        AINCRAD BYPASS
-      </p>
-
-      <input type="text" id="mehedy-key-input" placeholder="ENTER KEY HERE" style="width:100%;padding:12px;margin-bottom:16px;
-        border:1px solid rgba(0,255,204,0.4);border-radius:8px;
-        background:rgba(7,11,25,0.6);color:#fff;text-align:center;
-        box-sizing:border-box;font-size:13px;font-weight:600;
-        letter-spacing:1px;outline:none;transition:all 0.3s ease;
-        box-shadow:inset 0 2px 4px rgba(0,0,0,0.5);">
-
-      <button id="mehedy-login-btn" style="
-        width:100%;background:#00ffcc;color:#030712;border:none;
-        padding:12px;border-radius:8px;font-weight:700;cursor:pointer;
-        font-size:14px;letter-spacing:0.5px;margin-bottom:12px;
-        box-shadow:0 4px 12px rgba(0,255,204,0.3);transition:all 0.2s ease;">GET KEY</button>
-
-      <button id="mehedy-telegram-btn" style="
-        width:100%;background:#229ED9;color:#fff;border:none;
-        padding:12px;border-radius:8px;font-weight:700;cursor:pointer;
-        font-size:14px;letter-spacing:0.5px;
-        box-shadow:0 4px 12px rgba(34,158,217,0.25);">TELEGRAM</button>
-
-      <div id="mehedy-status" style="margin-top:16px;font-size:11px;font-weight:700;
-                                   color:#64748b;letter-spacing:1.5px;">Telegram : @mehedy4644</div>
-    `;
-    document.body.appendChild(authBox);
-
- 
- 
- 
- 
-    const musicBtn    = document.getElementById("mehedy-music-btn");
-    const keyInput    = document.getElementById("mehedy-key-input");
-    const loginBtn    = document.getElementById("mehedy-login-btn");
-    const telegramBtn = document.getElementById("mehedy-telegram-btn");
-    const statusEl   = document.getElementById("mehedy-status");
- 
-  
- // Auto load saved key
-const savedKey = localStorage.getItem("userKey");
-
-if (savedKey !== null) {
-    keyInput.value = savedKey;
-}
- 
-    setTimeout(() => {
-      authBox.style.zIndex = "2147483647";
-      if (window.innerWidth < 600) {
-        authBox.style.width    = "90%";
-        authBox.style.maxWidth = "300px";
-      }
-    }, 10);
-
- 
- 
- 
- 
-    const FALLBACK_MUSIC_URL = "https://raw.githubusercontent.com/mehedy4644/1/main/music.mp3";
-    let musicLoading = false;
-    musicBtn.addEventListener("click", async () => {
-      if (musicLoading) return;
-      if (!audioPlayer) {
-        musicLoading = true;
-        musicBtn.textContent = "⏳";
-        let resolvedUrl = FALLBACK_MUSIC_URL;
-        try {
-          const res      = await fetch(CONFIG.m + "&t=" + Date.now());
-          const audioUrl = (await res.text()).trim();
-          if (audioUrl && audioUrl.startsWith("http")) {
-            resolvedUrl = audioUrl;
-          } else {
-            console.log("Invalid audio URL in music, using fallback.");
-          }
-        } catch (err) {
-          console.log("Failed to fetch music URL, using fallback:", err);
-        }
-        audioPlayer      = new Audio(resolvedUrl);
-        audioPlayer.loop = true;
-        musicLoading = false;
-      }
-
- 
- 
- 
- 
-      if (audioPlayer.paused) {
-        audioPlayer.play()
-          .then(() => {
-            musicBtn.textContent       = "🔊";
-            musicBtn.style.color       = "#00ffcc";
-            musicBtn.style.borderColor = "#00ffcc";
-            musicBtn.style.boxShadow   = "0 0 10px rgba(0,255,204,0.4)";
-          })
-          .catch(err => {
-            console.log("Playback failed:", err);
-            musicBtn.textContent = "🔇";
-          });
-      } else {
-        audioPlayer.pause();
-        musicBtn.textContent       = "🔇";
-        musicBtn.style.color       = "#ff4444";
-        musicBtn.style.borderColor = "rgba(0,255,204,0.3)";
-        musicBtn.style.boxShadow   = "0 0 8px rgba(0,0,0,0.3)";
-      }
-    });
-
- 
- 
- 
- 
-    keyInput.addEventListener("focus", () => {
-      keyInput.style.border    = "1px solid #00ffcc";
-      keyInput.style.boxShadow = "0 0 10px rgba(0,255,204,0.25), inset 0 2px 4px rgba(0,0,0,0.5)";
-    });
-    keyInput.addEventListener("blur", () => {
-      keyInput.style.border    = "1px solid rgba(0,255,204,0.4)";
-      keyInput.style.boxShadow = "inset 0 2px 4px rgba(0,0,0,0.5)";
-    });
-
- 
- 
- 
- 
-    telegramBtn.addEventListener("click", async () => {
-      try {
-        const res = await fetch(CONFIG.t + "?t=" + Date.now());
-        const url = (await res.text()).trim();
-        if (url.startsWith("http")) window.open(url, "_blank");
-      } catch { /* silent */ }
-    });
-
- 
- 
- 
- 
-    loginBtn.addEventListener("click", async () => {
-      const inputKey = keyInput.value.trim();
-
-localStorage.setItem("userKey", inputKey);
-
-      statusEl.innerHTML = "<span style='color:#00ffcc; text-shadow:0 0 8px rgba(0,255,204,0.3);'>CONNECTING SERVER...</span>";
-      loginBtn.disabled = telegramBtn.disabled = true;
-      try {
-        const keyRes  = await fetch(CONFIG.k + "?t=" + Date.now());
-        const keyText = await keyRes.text();
-const validKeys = keyText
-  .split("\n")
-  .map(k => k.trim())
-  .filter(k => true);
-
-if (validKeys.includes(inputKey) ||
-  (keyText.trim() === "" && inputKey === "")) {
-
- 
- 
- 
-          statusEl.innerHTML = "<span style='color:#00ffcc;'>SUCCESS! ✓</span>";
-
-          setTimeout(async () => {
-            authBox.remove();
-
-            // Overlay: Checking Update
-            const loadingOverlay = document.createElement("div");
-            loadingOverlay.style.cssText = `
-              position:fixed; top:0; left:0; width:100%; height:100%;
-              background:rgba(3,7,18,0.85); backdrop-filter:blur(8px);
-              -webkit-backdrop-filter:blur(8px); z-index:2147483647;
-              display:flex; align-items:center; justify-content:center;
-              font-family:system-ui,-apple-system,sans-serif;
-            `;
-            loadingOverlay.innerHTML = `
-              <div style="text-align:center; background:rgba(6,10,23,0.95);
-                          padding:35px 30px; border-radius:16px;
-                          border:1px solid #00ffcc; width:290px;
-                          animation: mehedy-lightning-glow 3s linear infinite;">
-                <div style="width:45px; height:45px;
-                            border:4px solid rgba(0,255,204,0.1);
-                            border-top:4px solid #00ffcc; border-radius:50%;
-                            margin:0 auto 20px auto;
-                            animation:mehedy-spin 0.8s linear infinite;
-                            box-shadow:0 0 15px rgba(0,255,204,0.2);"></div>
-                <p id="mehedy-check-text" style="color:#00ffcc; font-size:15px;
-                   font-weight:700; margin:0; letter-spacing:1.5px;
-                   text-shadow:0 0 8px rgba(0,255,204,0.3);">CHECKING UPDATE...</p>
-              </div>
-            `;
-            document.body.appendChild(loadingOverlay);
-let hasUpdate = false;
-
-try {
-  const updateRes = await fetch(
-    "https://raw.githubusercontent.com/mehedy4644/1/main/version.txt?t=" + Date.now(),
-    { cache: "no-store" }
-  );
-
-  const currentVersion = (await updateRes.text()).trim();
-  const savedVersion = localStorage.getItem("github_version");
-
-  if (savedVersion === null) {
-    // প্রথমবার চালু হলে শুধু সেভ করবে, আপডেট দেখাবে না
-    localStorage.setItem("github_version", currentVersion);
-  } else if (savedVersion !== currentVersion) {
-    // নতুন আপডেট পাওয়া গেছে
-    hasUpdate = true;
-    localStorage.setItem("github_version", currentVersion);
+    return `${base}/${cleanPath}`;
   }
 
-} catch (e) {
-  console.error("Version check failed:", e);
-}
-            await new Promise(res => setTimeout(res, 1000));
 
-            const checkText = document.getElementById("mehedy-check-text");
-            checkText.innerHTML = hasUpdate
-              ? "<span style='color:#00ffcc;'>Link Updated Successfully! ✓</span>"
-              : "<span style='color:#ff4444; text-shadow:0 0 8px rgba(255,68,68,0.3);'>No Update Available!</span>";
+  // =========================================================
+  // REDIRECT API
+  // =========================================================
 
-            await new Promise(res => setTimeout(res, 1000));
-            loadingOverlay.remove();
-            
-            await fetchConfig();
-            
-            const totpGenerator = new TOTPGenerator(CONFIG.totpSecret);
-            
-            async function fetchRedirectUrlFromAPI(type, attempt = 1) {
-  const maxRetries = 3;
-
-  try {
-    const pin = await totpGenerator.generate();
-
-    const apiUrl =
-      `${CONFIG.apiBaseUrl}?file=crx.json&type=${type}` +
-      `&key=${CONFIG.apiKey}&pin=${pin}`;
-
-    const response = await fetch(apiUrl, {
-      headers: {
-        "Accept": "application/json",
-        "Cache-Control": "no-cache"
-      }
-    });
-
-    if (!response.ok) {
-      if (attempt < maxRetries) {
-        await new Promise(r => setTimeout(r, 2000));
-        return fetchRedirectUrlFromAPI(type, attempt + 1);
-      }
-      throw new Error("API request failed");
-    }
-
-    const data = await response.json();
-
-    return processApiResponse(data, pin, attempt);
-
-  } catch (error) {
-    if (attempt < maxRetries) {
-      await new Promise(r => setTimeout(r, 2000));
-      return fetchRedirectUrlFromAPI(type, attempt + 1);
-    }
-
-    throw error;
-  }
-}
-
-// ═══════════════════ API CONFIG AUTO UPDATE ═══════════════════
-async function fetchConfig() {
-  try {
-    const response = await fetch(
-      "https://raw.githubusercontent.com/A2MBD3/Aincrad/main/assets/data.json?t=" + Date.now(),
-      { cache: "no-store" }
-    );
-
-    if (!response.ok) {
-      throw new Error("Config HTTP " + response.status);
-    }
-
-    const data = await response.json();
-
-    if (data.apiBaseUrl) CONFIG.apiBaseUrl = data.apiBaseUrl;
-    if (data.apiKey) CONFIG.apiKey = data.apiKey;
-    if (data.totpSecret) CONFIG.totpSecret = data.totpSecret;
-    if (data.fallbackRedirectUrl) {
-      CONFIG.fallbackRedirectUrl = data.fallbackRedirectUrl;
-    }
-
-    console.log("API config updated");
-  } catch (error) {
-    console.error("API config update failed:", error);
-  }
-}
-
-// ═══════════════════ API INTEGRATION ═══════════════════
-function isValidRedirectUrl(url) {
-  if (!url) return false;
-  if (
-    url.includes('t.me/') ||
-    url.includes('telegram.me/') ||
-    url.includes('telegram.org/')
-  ) return false;
-
-  if (url === CONFIG.fallbackRedirectUrl) return false;
-
-  try {
-    const parsed = new URL(url);
-    return parsed.protocol === 'http:' || parsed.protocol === 'https:';
-  } catch {
-    return false;
-  }
-}
-
-function isTelegramLink(url) {
-  return url && (
-    url.includes('t.me/') ||
-    url.includes('telegram.me/')
-  );
-}
-
-// ═══════════════════ URL VALIDATION ═══════════════════
-function isTelegramLink(url) {
-  if (!url) return false;
-
-  const value = String(url).toLowerCase();
-
-  return (
-    value.includes("t.me/") ||
-    value.includes("telegram.me/") ||
-    value.includes("telegram.org/")
-  );
-}
-
-function isValidRedirectUrl(url) {
-  if (!url) return false;
-
-  if (isTelegramLink(url)) {
-    return false;
-  }
-
-  if (
-    CONFIG.fallbackRedirectUrl &&
-    url === CONFIG.fallbackRedirectUrl
+  async function getRedirectUrl(
+    path,
+    params = {}
   ) {
-    return false;
-  }
 
-  try {
-    const parsed = new URL(url);
+    const requestUrl =
+      new URL(getApiUrl(path));
 
-    return (
-      parsed.protocol === "http:" ||
-      parsed.protocol === "https:"
-    );
-  } catch {
-    return false;
-  }
-}
+    Object.entries(params).forEach(
+      ([key, value]) => {
 
-function processApiResponse(data, pin, attempt) {
-  const maxRetries = 3;
-  const destinationUrl = data.destinationLink;
-
-  // Telegram link reject
-  if (isTelegramLink(destinationUrl)) {
-    if (attempt < maxRetries) {
-      return fetchRedirectUrlFromAPI(
-        data.type || "2",
-        attempt + 1
-      );
-    }
-
-    throw new Error("Telegram URL rejected");
-  }
-
-  // Invalid URL reject
-  if (!isValidRedirectUrl(destinationUrl)) {
-    if (attempt < maxRetries) {
-      return fetchRedirectUrlFromAPI(
-        data.type || "2",
-        attempt + 1
-      );
-    }
-
-    throw new Error("Invalid redirect URL");
-  }
-
-  // Valid Aincrad redirect
-  return {
-    url: destinationUrl,
-    apiData: data,
-    pin: pin
-  };
-}
-
-  // Invalid URL হলে retry
-  if (attempt < maxRetries) {
-    return fetchRedirectUrlFromAPI(
-      data.type || "2",
-      attempt + 1
-    );
-  }
-
-  throw new Error("Invalid redirect URL");
-}
-
-            // Ambil URL redirect
-            const result = await fetchRedirectUrlFromAPI("2");
-const redirectUrl = result.url;
-
-            if (redirectUrl.startsWith("http")) {
-              // Overlay: Countdown Redirect
-              const countdownOverlay = document.createElement("div");
-              countdownOverlay.style.cssText = `
-                position:fixed; top:0; left:0; width:100%; height:100%;
-                background:rgba(3,7,18,0.05); backdrop-filter:blur(1px);
-                -webkit-backdrop-filter:blur(1px); z-index:2147483647;
-                display:flex; align-items:center; justify-content:center;
-                font-family:system-ui,-apple-system,sans-serif;
-              `;
-
-              const totalSeconds  = 30;
-              const DASH_TOTAL    = 760;
-
-              countdownOverlay.innerHTML = `
-                <div style="text-align:center;">
-                  <div style="position:relative; width:250px; height:250px;
-                              margin:0 auto; display:flex; align-items:center;
-                              justify-content:center;">
-                    <svg width="240" height="240"
-                         style="transform:rotate(0deg); position:relative; z-index:3;">
-   <path id="progress"
-d="M215 120
-   L215 199
-   Q215 215 199 215
-   L41 215
-   Q25 215 25 199
-   L25 41
-   Q25 25 41 25
-   L199 25
-   Q215 25 215 41
-   L215 120"
-fill="none"
-stroke="#00ffcc"
-stroke-width="14"
-stroke-linecap="round"
-stroke-linejoin="round"
-stroke-dasharray="760"
-stroke-dashoffset="760"
-style="
-filter:drop-shadow(0 0 8px #00ffcc);
-transition:stroke-dashoffset 1s linear;
-">
-</path>
-                    </svg>
-                    
-                    <div id="countdown-logo-card" style="
-position:absolute;
-top:50%;
-left:50%;
-transform:translate(-50%,-50%);
-width:190px;
-height:190px;
-border-radius:16px;
-overflow:hidden;
-
-border:2px solid #00ffcc;
-box-sizing:border-box;
-animation:mehedy-lightning-glow 3s linear infinite;
-
-z-index:2;
-">
-
-<img src="${CONFIG.l}" style="
-width:100%;
-height:100%;
-object-fit:cover;
-display:block;
-">
-
-</div>
-                    
-                    <div id="countdown-text" style="
-                      position:absolute; top:50%; left:50%;
-                      transform:translate(-50%,-50%);
-                      font-family:'Rajdhani',sans-serif;
-                      font-size:70px;
-font-family:'Share Tech Mono', monospace;
-font-weight:400;
-letter-spacing:3px;
-color:#00ffcc;
-text-shadow:
-0 0 10px #00ffcc,
-0 0 20px #00ffcc;
-                      text-shadow:0 0 20px #00ffcc, 0 0 30px rgba(0,255,204,0.3);
-                      z-index:4;">${totalSeconds}</div>
-                  </div>
-
-                  <p style="margin-top:30px; color:#00ffcc; font-size:16px;
-                             font-weight:700; letter-spacing:3px;
-                             text-shadow:0 0 12px rgba(0,255,204,0.4);
-                             position:relative; z-index:4;">REDIRECTING...</p>
-                </div>
-              `;
-              document.body.appendChild(countdownOverlay);
-
-              let remaining       = totalSeconds;
-              const progressCircle = countdownOverlay.querySelector("#progress");
-              const countdownText  = countdownOverlay.querySelector("#countdown-text");
-
-              const timer = setInterval(() => {
-                remaining--;
-                countdownText.textContent              = remaining;
-                progressCircle.style.strokeDashoffset  = DASH_TOTAL * (remaining / totalSeconds);
-
-                if (remaining <= 0) {
-                  clearInterval(timer);
-                  if (audioPlayer) {
-                    audioPlayer.pause();
-                    audioPlayer = null;
-                  }
-                  countdownOverlay.remove();
-                  window.location.replace(redirectUrl);
-                }
-              }, 1000);
-            }
-
-          }, 800);
-
-        } else {
- 
- 
- 
- 
-          statusEl.innerHTML = "<span style='color:#ff4444;'>INVALID LICENSE KEY!</span>";
-          loginBtn.disabled = telegramBtn.disabled = false;
+        if (
+          value !== undefined &&
+          value !== null
+        ) {
+          requestUrl.searchParams.set(
+            key,
+            String(value)
+          );
         }
 
-      } catch {
-        statusEl.innerHTML = "<span style='color:#ff4444;'>SERVER ERROR!</span>";
-        loginBtn.disabled = telegramBtn.disabled = false;
       }
-    });
+    );
 
-  })();
+
+    DBG.log(
+      "API",
+      "Requesting redirect URL"
+    );
+
+
+    const response =
+      await fetch(
+        requestUrl.toString(),
+        {
+          method: "GET",
+          cache: "no-store",
+          headers: {
+            "Accept":
+              "application/json"
+          }
+        }
+      );
+
+
+    if (!response.ok) {
+
+      throw new Error(
+        `Redirect API: HTTP ${response.status}`
+      );
+    }
+
+
+    const data =
+      await response.json();
+
+
+    if (
+      !data ||
+      typeof data.url !== "string"
+    ) {
+
+      throw new Error(
+        "API did not return a valid URL"
+      );
+    }
+
+
+    const redirectUrl =
+      data.url.trim();
+
+
+    if (!redirectUrl) {
+
+      throw new Error(
+        "Redirect URL is empty"
+      );
+    }
+
+
+    return redirectUrl;
+  }
+
+
+  // =========================================================
+  // REDIRECT
+  // =========================================================
+
+  async function redirectFromApi(
+    path,
+    params = {}
+  ) {
+
+    try {
+
+      const redirectUrl =
+        await getRedirectUrl(
+          path,
+          params
+        );
+
+
+      DBG.log(
+        "REDIRECT",
+        "Redirecting"
+      );
+
+
+      window.location.assign(
+        redirectUrl
+      );
+
+
+    } catch (error) {
+
+      DBG.error(
+        "REDIRECT",
+        error.message
+      );
+
+
+      showStatus(
+        "REDIRECT FAILED",
+        "error"
+      );
+    }
+  }
+
+
+  // =========================================================
+  // STATUS
+  // =========================================================
+
+  function showStatus(
+    message,
+    type = "normal"
+  ) {
+
+    const element =
+      document.getElementById(
+        "mehedy-status"
+      );
+
+
+    if (!element) return;
+
+
+    element.textContent =
+      message;
+
+
+    if (type === "success") {
+
+      element.style.color =
+        "#00ffcc";
+
+    } else if (type === "error") {
+
+      element.style.color =
+        "#ff4444";
+
+    } else {
+
+      element.style.color =
+        "#64748b";
+    }
+  }
+
+
+  // =========================================================
+  // UI
+  // =========================================================
+
+  function createUI() {
+
+    if (
+      document.getElementById(
+        "mehedy-auth-box"
+      )
+    ) {
+      return;
+    }
+
+
+    const style =
+      document.createElement("style");
+
+
+    style.textContent = `
+      #mehedy-auth-box {
+        position:fixed;
+        top:50%;
+        left:50%;
+        transform:translate(-50%,-50%);
+        width:300px;
+        padding:25px;
+        box-sizing:border-box;
+        background:#060a17;
+        color:#fff;
+        border:2px solid #00ffcc;
+        border-radius:16px;
+        z-index:2147483647;
+        font-family:system-ui,sans-serif;
+        text-align:center;
+        box-shadow:0 20px 50px rgba(0,0,0,.6);
+      }
+
+      #mehedy-logo {
+        width:100px;
+        height:100px;
+        object-fit:cover;
+        border-radius:15px;
+        margin-bottom:15px;
+      }
+
+      #mehedy-key-input {
+        width:100%;
+        box-sizing:border-box;
+        padding:12px;
+        margin:10px 0;
+        border-radius:8px;
+        border:1px solid #00ffcc;
+        background:#070b19;
+        color:#fff;
+        text-align:center;
+      }
+
+      .mehedy-btn {
+        width:100%;
+        padding:12px;
+        margin-top:8px;
+        border:0;
+        border-radius:8px;
+        cursor:pointer;
+        font-weight:bold;
+      }
+
+      #mehedy-login-btn {
+        background:#00ffcc;
+        color:#030712;
+      }
+
+      #mehedy-telegram-btn {
+        background:#229ed9;
+        color:#fff;
+      }
+    `;
+
+
+    document.head.appendChild(style);
+
+
+    const box =
+      document.createElement("div");
+
+
+    box.id =
+      "mehedy-auth-box";
+
+
+    box.innerHTML = `
+      <img
+        id="mehedy-logo"
+        src="${CONFIG.logoUrl}"
+      >
+
+      <h3>MEHEDY</h3>
+
+      <p>AINCRAD BYPASS</p>
+
+      <input
+        id="mehedy-key-input"
+        type="text"
+        placeholder="ENTER KEY HERE"
+      >
+
+      <button
+        id="mehedy-login-btn"
+        class="mehedy-btn"
+      >
+        VERIFY KEY
+      </button>
+
+      <button
+        id="mehedy-telegram-btn"
+        class="mehedy-btn"
+        disabled
+      >
+        TELEGRAM
+      </button>
+
+      <div
+        id="mehedy-status"
+        style="margin-top:15px"
+      >
+        Loading...
+      </div>
+    `;
+
+
+    document.body.appendChild(box);
+  }
+
+
+  // =========================================================
+  // INITIALIZATION
+  // =========================================================
+
+  async function initialize() {
+
+    DBG.log(
+      "INIT",
+      "Starting script"
+    );
+
+
+    createUI();
+
+
+    const keyInput =
+      document.getElementById(
+        "mehedy-key-input"
+      );
+
+
+    const loginButton =
+      document.getElementById(
+        "mehedy-login-btn"
+      );
+
+
+    const telegramButton =
+      document.getElementById(
+        "mehedy-telegram-btn"
+      );
+
+
+    /*
+     * GitHub data load
+     */
+
+    const github =
+      await loadGithubData();
+
+
+    /*
+     * Telegram link
+     * ONLY GitHub থেকে
+     */
+
+    const telegram =
+      normalizeTelegramUrl(
+        github.telegram
+      );
+
+
+    if (telegram) {
+
+      telegramButton.disabled =
+        false;
+
+      telegramButton.addEventListener(
+        "click",
+        () => {
+
+          window.open(
+            telegram,
+            "_blank",
+            "noopener,noreferrer"
+          );
+
+        }
+      );
+
+      showStatus(
+        "READY",
+        "success"
+      );
+
+    } else {
+
+      showStatus(
+        "TELEGRAM LINK NOT AVAILABLE",
+        "error"
+      );
+    }
+
+
+    /*
+     * Key data
+     */
+
+    const validKeys =
+      github.key
+        .split(/\r?\n/)
+        .map(
+          value => value.trim()
+        )
+        .filter(Boolean);
+
+
+    /*
+     * Login
+     */
+
+    loginButton.addEventListener(
+      "click",
+      async () => {
+
+        const entered =
+          keyInput.value.trim();
+
+
+        if (!entered) {
+
+          showStatus(
+            "ENTER KEY",
+            "error"
+          );
+
+          return;
+        }
+
+
+        const valid =
+          validKeys.includes(
+            entered
+          );
+
+
+        if (!valid) {
+
+          showStatus(
+            "INVALID KEY",
+            "error"
+          );
+
+          return;
+        }
+
+
+        showStatus(
+          "KEY VERIFIED",
+          "success"
+        );
+
+
+        /*
+         * Redirect API
+         *
+         * এখানে আপনার নিজের API endpoint
+         * ব্যবহার করুন।
+         */
+
+        await redirectFromApi(
+          "redirect",
+          {
+            key: entered
+          }
+        );
+
+      }
+    );
+
+
+    DBG.log(
+      "INIT",
+      "Initialization complete"
+    );
+  }
+
+
+  // =========================================================
+  // START
+  // =========================================================
+
+  if (
+    document.readyState ===
+    "loading"
+  ) {
+
+    document.addEventListener(
+      "DOMContentLoaded",
+      initialize
+    );
+
+  } else {
+
+    initialize();
+
+  }
+
+
+  // =========================================================
+  // GLOBAL EXPORTS
+  // =========================================================
+
+  window.MEHEDY_CONFIG =
+    CONFIG;
+
+  window.MEHEDY_DEBUG =
+    DBG;
+
 })();
