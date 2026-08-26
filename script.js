@@ -1432,6 +1432,15 @@
       if (autoInitTimeout) clearTimeout(autoInitTimeout);
       deactivateFocusGlow(focusGlow1, focusGlow2);
       
+      if (!directTarget) {
+  directTarget = {
+    target: "2",
+    name: "Aincrad",
+    moduleType: "standard",
+    apiType: "2"
+  };
+}
+      
       if (directTarget) {
         selectedTarget = directTarget.target;
         selectedTargetName = directTarget.name;
