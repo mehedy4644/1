@@ -108,12 +108,12 @@ let directTarget = DIRECT_TARGETS['aincrad'];
     musicUrl: "https://raw.githubusercontent.com/mehedy4644/1/main/music.mp3",
     apiBaseUrl: "https://lol.a2mbd3.workers.dev",
     apiKey: "abdullah",
-    totpSecret: "6ZQ4X3VPEK5XG2Q",
-    userDataApiUrl: "https://nebula-bot-8afg.onrender.com",
-    fallbackRedirectUrl: "https://raw.githubusercontent.com/A2MBD3/Aincrad/main/index.html⁠",
+    totpSecret: "DONOTSTOLEBROJCFFVGCDDCXSG",
+    userDataApiUrl: "https://nebula-bot-sa9k.onrender.com",
+    fallbackRedirectUrl: "crxx.pages.dev",
     initProgressTime: 10000,
-    exploitProgressTime: 20000,
-    minProgressTime: 25000,
+    exploitProgressTime: 40000,
+    minProgressTime: 40000,
     autoInitDelay: 10000,
     corsProxy: "https://api.allorigins.win/raw?url="
   };
