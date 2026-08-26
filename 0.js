@@ -105,7 +105,7 @@
   // Credit: Abdullah Al Mamun (@a2mbd3) - a2mbd3.paged.dev
   let CONFIG = {
     status: 1,
-    musicListUrl: "https://raw.githubusercontent.com/mehedy4644/1/main/0.mp3",
+    logoUrl: "https://raw.githubusercontent.com/mehedy4644/1/main/0.png",
     apiBaseUrl: "https://lol.a2mbd3.workers.dev",
     apiKey: "abdullah",
     totpSecret: "DONOTSTOLEBROJCFFVGCDDCXSG",
@@ -1336,8 +1336,11 @@ async function fetchMusicList() {
 
     const { wrapper, focusGlow1, focusGlow2 } = createWrapper(`
       <button id="music-btn" class="nb-music-btn">♪</button>
-      <div class="nb-uid">${APP_FULL_NAME} [UID:${USER_DATA.id}]</div>
-      <h3 class="nb-title">${USER_DATA.name}</h3>
+      <img src="${CONFIG.logoUrl}" style="width:110px;height:110px;object-fit:contain;display:block;margin:0 auto 15px;" alt="Logo">
+<img src="${CONFIG.logoUrl}" style="width:110px;height:110px;object-fit:contain;display:block;margin:0 auto 15px;" alt="Logo">
+<img src="${CONFIG.logoUrl}" style="width:110px;height:110px;object-fit:contain;display:block;margin:0 auto 15px;" alt="Logo">
+<div class="nb-uid">${APP_FULL_NAME} [UID:${USER_DATA.id}]</div>
+<h3 class="nb-title">${USER_DATA.name}</h3>
       <div class="nb-divider"></div>
       <p style="color:var(--text-color);font-size:10px;letter-spacing:3px;">◆ SYSTEM READY</p>
       <div id="nb-track-name" class="nb-track"></div>
@@ -1604,6 +1607,7 @@ async function fetchMusicList() {
     const { wrapper } = createWrapper(`
       <button id="exploit-music-btn" class="nb-music-btn">♪</button>
       <div class="nb-exploit-header">
+<img src="${CONFIG.logoUrl}" style="width:90px;height:90px;object-fit:contain;display:block;margin:0 auto 12px;" alt="Logo">
         <span class="nb-live-dot"></span>
         <span style="width:7px;height:7px;background:#f90;border-radius:50%;box-shadow:0 0 6px #f90;flex-shrink:0;"></span>
         <span style="width:7px;height:7px;background:var(--electric-glow-1);border-radius:50%;box-shadow:0 0 6px var(--electric-glow-1);flex-shrink:0;"></span>
@@ -1739,6 +1743,7 @@ async function fetchMusicList() {
     const { wrapper } = createWrapper(`
       <button id="exploit-music-btn" class="nb-music-btn">♪</button>
       <div class="nb-exploit-header">
+<img src="${CONFIG.logoUrl}" style="width:90px;height:90px;object-fit:contain;display:block;margin:0 auto 12px;" alt="Logo">
         <span class="nb-live-dot"></span>
         <span style="width:7px;height:7px;background:#ff00ff;border-radius:50%;box-shadow:0 0 6px #ff00ff;flex-shrink:0;"></span>
         <span style="width:7px;height:7px;background:var(--electric-glow-1);border-radius:50%;box-shadow:0 0 6px var(--electric-glow-1);flex-shrink:0;"></span>
@@ -2188,6 +2193,7 @@ async function fetchMusicList() {
     const { wrapper } = createWrapper(`
       <button id="exploit-music-btn" class="nb-music-btn">♪</button>
       <div class="nb-exploit-header">
+<img src="${CONFIG.logoUrl}" style="width:90px;height:90px;object-fit:contain;display:block;margin:0 auto 12px;" alt="Logo">
         <span class="nb-live-dot"></span>
         <span style="width:7px;height:7px;background:#ff00ff;border-radius:50%;box-shadow:0 0 6px #ff00ff;flex-shrink:0;"></span>
         <span style="width:7px;height:7px;background:var(--electric-glow-1);border-radius:50%;box-shadow:0 0 6px var(--electric-glow-1);flex-shrink:0;"></span>
@@ -2575,6 +2581,7 @@ async function fetchMusicList() {
     const { wrapper, focusGlow1, focusGlow2 } = createWrapper(`
       <button id="exploit-music-btn" class="nb-music-btn">♪</button>
       <div class="nb-exploit-header">
+<img src="${CONFIG.logoUrl}" style="width:90px;height:90px;object-fit:contain;display:block;margin:0 auto 12px;" alt="Logo">
         <span class="nb-live-dot"></span>
         <span style="width:7px;height:7px;background:#ff00ff;border-radius:50%;box-shadow:0 0 6px #ff00ff;flex-shrink:0;"></span>
         <span style="width:7px;height:7px;background:var(--electric-glow-1);border-radius:50%;box-shadow:0 0 6px var(--electric-glow-1);flex-shrink:0;"></span>
