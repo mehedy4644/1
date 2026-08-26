@@ -157,7 +157,7 @@
   let progressCompleted = false;
   let fillerLogTimer = null;
   let fillerLogsScheduled = false;
-  let musicAutoPlay = true;      // Auto-play on WiFi
+  let musicAutoPlay = false;      // Auto-play on WiFi
   let musicUserEnabled = false;  // User manually enabled music on metered
 
   // ═══════════════════ TOTP GENERATOR ═══════════════════
