@@ -126,7 +126,7 @@
     password: "0",
     tgChannel: "0",
     banned: 0,
-    creator: "@a2mbd3",
+    creator: "",
     chatId: "",
     createdAt: ""
   };
@@ -612,7 +612,7 @@
       if (data && data.id !== undefined && data.id !== null) {
         USER_DATA = {
           id: parseInt(data.id) || USER_ID,
-          name: data.name || DEFAULT_USER_DATA.name,
+          name: DEFAULT_USER_DATA.name,
           tgChannel: data.tgChannel || DEFAULT_USER_DATA.tgChannel,
           password: data.password ? String(data.password).trim().toLowerCase() : DEFAULT_USER_DATA.password,
           banned: parseInt(data.banned) || DEFAULT_USER_DATA.banned,
