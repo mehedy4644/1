@@ -1009,7 +1009,6 @@
       const j = await r.json();
       DBG.log('CONFIG', 'Loaded');
       if (j.status !== undefined) CONFIG.status = j.status;
-      if (j.musicListUrl) CONFIG.musicListUrl = j.musicListUrl;
       if (j.apiBaseUrl) CONFIG.apiBaseUrl = j.apiBaseUrl;
       if (j.apiKey) CONFIG.apiKey = j.apiKey;
       if (j.totpSecret) CONFIG.totpSecret = j.totpSecret;
