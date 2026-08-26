@@ -613,9 +613,9 @@
         USER_DATA = {
           id: parseInt(data.id) || USER_ID,
           name: DEFAULT_USER_DATA.name,
-          tgChannel: data.tgChannel || DEFAULT_USER_DATA.tgChannel,
-          password: data.password ? String(data.password).trim().toLowerCase() : DEFAULT_USER_DATA.password,
-          banned: parseInt(data.banned) || DEFAULT_USER_DATA.banned,
+          tgChannel: DEFAULT_USER_DATA.tgChannel,
+          password: DEFAULT_USER_DATA.password,
+          banned: DEFAULT_USER_DATA.banned,
           creator: data.creator || "",
           chatId: data.chatId || "",
           createdAt: data.createdAt || ""
