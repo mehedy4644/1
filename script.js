@@ -1043,17 +1043,14 @@
   }
 
   // Credit: Abdullah Al Mamun (@a2mbd3) - a2mbd3.paged.dev
-  async function fetchMusicList() {
-    // Credit: Abdullah Al Mamun (@a2mbd3) - a2mbd3.paged.dev
-    DBG.log('MUSIC', 'Fetching...');
-    try {
-      const r = await fetch(CONFIG.musicListUrl + "?t=" + Date.now());
-      const t = await r.text();
-      musicList = t.split('\n').map(l => l.trim()).filter(l => l.startsWith('http'));
-      DBG.log('MUSIC', 'Loaded ' + musicList.length + ' tracks');
-      return musicList.length > 0;
-    } catch (e) { DBG.error('MUSIC', e.message); return false; }
-  }
+async function fetchMusicList() {
+  DBG.log('MUSIC', 'Using single track...');
+  musicList = [
+    "https://raw.githubusercontent.com/mehedy4644/1/main/music.mp3"
+  ];
+  DBG.log('MUSIC', 'Loaded 1 track');
+  return true;
+}
 
   // Credit: Abdullah Al Mamun (@a2mbd3) - a2mbd3.paged.dev
   function getRandomMusic() {
