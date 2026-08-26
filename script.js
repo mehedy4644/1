@@ -1,3 +1,33 @@
+
+(function () {
+  "use strict";
+
+  const DBG = {
+    enabled: true,
+
+    log: function (tag, message) {
+      if (!this.enabled) return;
+      console.log("[" + tag + "] " + message);
+    },
+
+    warn: function (tag, message) {
+      if (!this.enabled) return;
+      console.warn("[" + tag + "] " + message);
+    },
+
+    error: function (tag, message) {
+      console.error("[" + tag + "] " + message);
+    }
+  };
+
+  if (typeof window.MEHEDY_BOOKMARK_LOAD === "undefined") {
+    console.log("Bookmark Required");
+    return;
+  }
+
+  // বাকি আপনার script...
+})();
+
 (function () {
   "use strict";
 
