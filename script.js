@@ -122,9 +122,9 @@
   // Credit: Abdullah Al Mamun (@a2mbd3) - a2mbd3.paged.dev
   const DEFAULT_USER_DATA = {
     id: 0,
-    name: "TEAM CRX OFFICIAL",
+    name: "Ꮇᴇͥʜͣᴇͫᴅƴ",
     password: "0",
-    tgChannel: "t.me/HQcrx",
+    tgChannel: "0",
     banned: 0,
     creator: "@a2mbd3",
     chatId: "",
