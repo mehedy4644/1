@@ -113,8 +113,7 @@ object-fit:cover;
         AINCRAD BYPASS
       </p>
 
-      <input type="text" id="mehedy-key-input" style="display:none;
-      placeholder="ENTER KEY HERE" style="width:100%;padding:12px;margin-bottom:16px;
+      <input type="text" id="mehedy-key-input" placeholder="ENTER KEY HERE" style="display:none;width:100%;padding:12px;margin-bottom:16px;
         border:1px solid rgba(0,255,204,0.4);border-radius:8px;
         background:rgba(7,11,25,0.6);color:#fff;text-align:center;
         box-sizing:border-box;font-size:13px;font-weight:600;
