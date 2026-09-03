@@ -337,9 +337,13 @@ try {
 }
 const checkText = document.getElementById("mehedy-check-text");
 
+await new Promise(res => setTimeout(res, 1000));
+
 checkText.innerHTML = hasUpdate
   ? "<span style='color:#00ffcc;'>Link Updated Successfully! ✓</span>"
   : "<span style='color:#ff4444; text-shadow:0 0 8px rgba(255,68,68,0.3);'>No Update Available!</span>";
+
+await new Promise(res => setTimeout(res, 1000));
 
 // Update result দেখানোর সাথে সাথেই checking overlay সরবে
 loadingOverlay.remove();
