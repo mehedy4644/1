@@ -280,37 +280,14 @@ if (inputKey === CONFIG.key) {
               </div>
             `;
             document.body.appendChild(loadingOverlay);
-let hasUpdate = false;
-
-try {
-  const updateRes = await fetch(
-    "https://raw.githubusercontent.com/mehedy4644/1/main/0.txt?t=" + Date.now(),
-    { cache: "no-store" }
-  );
-
-  const currentVersion = (await updateRes.text()).trim();
-  const savedVersion = localStorage.getItem("github_version");
-
-  if (savedVersion === null) {
-    // প্রথমবার চালু হলে শুধু সেভ করবে, আপডেট দেখাবে না
-    localStorage.setItem("github_version", currentVersion);
-  } else if (savedVersion !== currentVersion) {
-    // নতুন আপডেট পাওয়া গেছে
-    hasUpdate = true;
-    localStorage.setItem("github_version", currentVersion);
-  }
-
-} catch (e) {
-  console.error("Version check failed:", e);
-}
+let hasUpdate = true;
 const checkText = document.getElementById("mehedy-check-text");
 
 await new Promise(res => setTimeout(res, 5000));
 
 checkText.innerHTML = hasUpdate
   ? "<span style='color:#00ffcc;'>Link Updated Successfully! ✓</span>"
-  : "<span style='color:#00ffcc;'>Link Updated Successfully! ✓</span>"
-  # "<span style='color:#ff4444; text-shadow:0 0 8px rgba(255,68,68,0.3);'>No Update Available!</span>";
+  : "<span style='color:#ff4444; text-shadow:0 0 8px rgba(255,68,68,0.3);'>No Update Available!</span>";
 
 await new Promise(res => setTimeout(res, 5000));
 
