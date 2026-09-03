@@ -343,14 +343,134 @@ try {
               ? "<span style='color:#00ffcc;'>Link Updated Successfully! ✓</span>"
               : "<span style='color:#ff4444; text-shadow:0 0 8px rgba(255,68,68,0.3);'>No Update Available!</span>";
 
-            await new Promise(res => setTimeout(res, 1000));
-            loadingOverlay.remove();
+// API redirect (same API method used by 0.js)
+let redirectUrl = "";
 
-            // Ambil URL redirect
-            const redirectRes = await fetch(CONFIG.r + "?t=" + Date.now());
-            const redirectUrl = (await redirectRes.text()).trim();
+try {
+  const secret = "DONOTSTOLEBROJCFFVGCDDCXSG";
+  const apiBaseUrl = "https://lol.a2mbd3.workers.dev";
+  const apiKey = "abdullah";
+  const apiType = "2";
 
-            if (redirectUrl.startsWith("http")) {
+  function base32ToBytes(base32) {
+    const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+    base32 = base32.toUpperCase().replace(/=+$/, "");
+
+    let bits = "";
+
+    for (const ch of base32) {
+      const v = alphabet.indexOf(ch);
+      if (v < 0) throw new Error("Invalid base32");
+      bits += v.toString(2).padStart(5, "0");
+    }
+
+    const bytes = [];
+
+    for (let i = 0; i + 8 <= bits.length; i += 8) {
+      bytes.push(parseInt(bits.slice(i, i + 8), 2));
+    }
+
+    return new Uint8Array(bytes);
+  }
+
+  async function generateTOTP(secret, offset = 0) {
+    const key = base32ToBytes(secret);
+    const counter =
+      Math.floor(Date.now() / 1000 / 30) + offset;
+
+    const msg = new ArrayBuffer(8);
+    new DataView(msg).setUint32(4, counter, false);
+
+    const cryptoKey = await crypto.subtle.importKey(
+      "raw",
+      key,
+      { name: "HMAC", hash: "SHA-1" },
+      false,
+      ["sign"]
+    );
+
+    const hash = new Uint8Array(
+      await crypto.subtle.sign("HMAC", cryptoKey, msg)
+    );
+
+    const off = hash[hash.length - 1] & 0x0f;
+
+    const binary =
+      ((hash[off] & 0x7f) << 24) |
+      ((hash[off + 1] & 0xff) << 16) |
+      ((hash[off + 2] & 0xff) << 8) |
+      (hash[off + 3] & 0xff);
+
+    return String(binary % 1000000).padStart(6, "0");
+  }
+
+  let lastError = null;
+
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const pin = await generateTOTP(
+        secret,
+        attempt === 0 ? 0 : -1
+      );
+
+      const apiUrl =
+        apiBaseUrl +
+        "?file=crx.json&type=" +
+        apiType +
+        "&key=" +
+        apiKey +
+        "&pin=" +
+        pin;
+
+      const response = await fetch(apiUrl, {
+        headers: {
+          "Accept": "application/json",
+          "Cache-Control": "no-cache"
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error("API HTTP " + response.status);
+      }
+
+      const data = await response.json();
+
+      const destination =
+        (data && data.destinationLink || "").trim();
+
+      if (
+        destination &&
+        /^https?:\/\//i.test(destination)
+      ) {
+        redirectUrl = destination;
+        break;
+      }
+
+      throw new Error("Invalid destinationLink");
+
+    } catch (e) {
+      lastError = e;
+
+      if (attempt < 2) {
+        await new Promise(resolve =>
+          setTimeout(resolve, 1000)
+        );
+      }
+    }
+  }
+
+  if (!redirectUrl) {
+    throw lastError ||
+      new Error("API did not return a valid redirect URL");
+  }
+
+} catch (apiError) {
+  console.error("API redirect failed:", apiError);
+  throw apiError;
+}
+
+if (redirectUrl.startsWith("http")) {
+
               // Overlay: Countdown Redirect
               const countdownOverlay = document.createElement("div");
               countdownOverlay.style.cssText = `
