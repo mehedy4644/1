@@ -17,8 +17,8 @@
  
  
   const CONFIG = {
-    k: "https://raw.githubusercontent.com/mehedy4644/1/main/1.txt",
-    t: "https://raw.githubusercontent.com/mehedy4644/1/main/2.txt",
+    key: "",
+    telegram: "https://t.me/mehedy4644",
     m: "https://raw.githubusercontent.com/mehedy4644/1/main/0.mp3",
     l: "https://raw.githubusercontent.com/mehedy4644/1/main/0.png",
     s: `position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
@@ -250,11 +250,9 @@ if (savedKey !== null) {
  
     telegramBtn.addEventListener("click", async () => {
       try {
-        const res = await fetch(CONFIG.t + "?t=" + Date.now());
-        const url = (await res.text()).trim();
-        if (url.startsWith("http")) window.open(url, "_blank");
-      } catch { /* silent */ }
-    });
+telegramBtn.addEventListener("click", () => {
+  window.open(CONFIG.telegram, "_blank");
+});
 
  
  
@@ -268,19 +266,9 @@ localStorage.setItem("userKey", inputKey);
       statusEl.innerHTML = "<span style='color:#00ffcc; text-shadow:0 0 8px rgba(0,255,204,0.3);'>CONNECTING SERVER...</span>";
       loginBtn.disabled = telegramBtn.disabled = true;
       try {
-        const keyRes  = await fetch(CONFIG.k + "?t=" + Date.now());
-        const keyText = await keyRes.text();
-const validKeys = keyText
-  .split("\n")
-  .map(k => k.trim())
-  .filter(k => true);
+      
+if (inputKey === CONFIG.key) {
 
-if (validKeys.includes(inputKey) ||
-  (keyText.trim() === "" && inputKey === "")) {
-
- 
- 
- 
           statusEl.innerHTML = "<span style='color:#00ffcc;'>SUCCESS! ✓</span>";
 
           setTimeout(async () => {
@@ -353,7 +341,7 @@ let redirectUrl = "";
 let apiFinished = false;
 let apiError = null;
 
-const totalSeconds = 70;
+const totalSeconds = 80;
 let remaining = totalSeconds;
 const DASH_TOTAL = 760;
 
@@ -790,7 +778,7 @@ if (redirectUrl.startsWith("http")) {
                 font-family:system-ui,-apple-system,sans-serif;
               `;
 
-const totalSeconds = 70;
+const totalSeconds = 80;
 const DASH_TOTAL = 760;
 
               countdownOverlay.innerHTML = `
