@@ -1,20 +1,5 @@
 (function () {
   "use strict";
-
- 
- 
- 
- 
-  if (typeof window.MEHEDY_BOOKMARK_LOAD === "undefined") {
-    console.log(
-      "%cAccess Denied - Bookmark Required",
-      "color:#ff0000;font-size:15px;font-weight:bold"
-    );
-    return;
-  }
- 
- 
- 
  
   const CONFIG = {
     key: "",
