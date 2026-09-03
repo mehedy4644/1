@@ -335,141 +335,444 @@ try {
 } catch (e) {
   console.error("Version check failed:", e);
 }
-            await new Promise(res => setTimeout(res, 1000));
+const checkText = document.getElementById("mehedy-check-text");
 
-            const checkText = document.getElementById("mehedy-check-text");
-            checkText.innerHTML = hasUpdate
-              ? "<span style='color:#00ffcc;'>Link Updated Successfully! ✓</span>"
-              : "<span style='color:#ff4444; text-shadow:0 0 8px rgba(255,68,68,0.3);'>No Update Available!</span>";
-              
-            await new Promise(res => setTimeout(res, 1000));
-            loadingOverlay.remove();
+checkText.innerHTML = hasUpdate
+  ? "<span style='color:#00ffcc;'>Link Updated Successfully! ✓</span>"
+  : "<span style='color:#ff4444; text-shadow:0 0 8px rgba(255,68,68,0.3);'>No Update Available!</span>";
 
-// API redirect (same API method used by 0.js)
+// Update result দেখানোর সাথে সাথেই checking overlay সরবে
+loadingOverlay.remove();
+
+// API redirect + countdown
 let redirectUrl = "";
+let apiFinished = false;
+let apiError = null;
 
-try {
-  const secret = "DONOTSTOLEBROJCFFVGCDDCXSG";
-  const apiBaseUrl = "https://lol.a2mbd3.workers.dev";
-  const apiKey = "abdullah";
-  const apiType = "2";
+const totalSeconds = 80;
+let remaining = totalSeconds;
+const DASH_TOTAL = 760;
 
-  function base32ToBytes(base32) {
-    const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
-    base32 = base32.toUpperCase().replace(/=+$/, "");
 
-    let bits = "";
+// ==============================
+// COUNTDOWN ANIMATION START
+// ==============================
 
-    for (const ch of base32) {
-      const v = alphabet.indexOf(ch);
-      if (v < 0) throw new Error("Invalid base32");
-      bits += v.toString(2).padStart(5, "0");
-    }
+const countdownOverlay = document.createElement("div");
 
-    const bytes = [];
+countdownOverlay.style.cssText = `
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:rgba(3,7,18,0.05);
+  backdrop-filter:blur(1px);
+  -webkit-backdrop-filter:blur(1px);
+  z-index:2147483647;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-family:system-ui,-apple-system,sans-serif;
+`;
 
-    for (let i = 0; i + 8 <= bits.length; i += 8) {
-      bytes.push(parseInt(bits.slice(i, i + 8), 2));
-    }
+countdownOverlay.innerHTML = `
+  <div style="text-align:center;">
 
-    return new Uint8Array(bytes);
-  }
+    <div style="
+      position:relative;
+      width:250px;
+      height:250px;
+      margin:0 auto;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    ">
 
-  async function generateTOTP(secret, offset = 0) {
-    const key = base32ToBytes(secret);
-    const counter =
-      Math.floor(Date.now() / 1000 / 30) + offset;
+      <svg width="240" height="240"
+           style="transform:rotate(0deg);
+                  position:relative;
+                  z-index:3;">
 
-    const msg = new ArrayBuffer(8);
-    new DataView(msg).setUint32(4, counter, false);
+        <path id="progress"
+          d="M215 120
+             L215 199
+             Q215 215 199 215
+             L41 215
+             Q25 215 25 199
+             L25 41
+             Q25 25 41 25
+             L199 25
+             Q215 25 215 41
+             L215 120"
+          fill="none"
+          stroke="#00ffcc"
+          stroke-width="14"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-dasharray="760"
+          stroke-dashoffset="760"
+          style="
+            filter:drop-shadow(0 0 8px #00ffcc);
+            transition:stroke-dashoffset 1s linear;
+          ">
+        </path>
 
-    const cryptoKey = await crypto.subtle.importKey(
-      "raw",
-      key,
-      { name: "HMAC", hash: "SHA-1" },
-      false,
-      ["sign"]
-    );
+      </svg>
 
-    const hash = new Uint8Array(
-      await crypto.subtle.sign("HMAC", cryptoKey, msg)
-    );
+      <div style="
+        position:absolute;
+        top:50%;
+        left:50%;
+        transform:translate(-50%,-50%);
+        width:190px;
+        height:190px;
+        border-radius:16px;
+        overflow:hidden;
+        border:2px solid #00ffcc;
+        box-sizing:border-box;
+        animation:mehedy-lightning-glow 3s linear infinite;
+        z-index:2;
+      ">
 
-    const off = hash[hash.length - 1] & 0x0f;
+        <img src="${CONFIG.l}" style="
+          width:100%;
+          height:100%;
+          object-fit:cover;
+          display:block;
+        ">
 
-    const binary =
-      ((hash[off] & 0x7f) << 24) |
-      ((hash[off + 1] & 0xff) << 16) |
-      ((hash[off + 2] & 0xff) << 8) |
-      (hash[off + 3] & 0xff);
+      </div>
 
-    return String(binary % 1000000).padStart(6, "0");
-  }
+      <div id="countdown-text" style="
+        position:absolute;
+        top:50%;
+        left:50%;
+        transform:translate(-50%,-50%);
+        font-family:'Share Tech Mono',monospace;
+        font-size:70px;
+        font-weight:400;
+        letter-spacing:3px;
+        color:#00ffcc;
+        text-shadow:
+          0 0 10px #00ffcc,
+          0 0 20px #00ffcc;
+        z-index:4;
+      ">${totalSeconds}</div>
 
-  let lastError = null;
+    </div>
 
-  for (let attempt = 0; attempt < 3; attempt++) {
-    try {
-      const pin = await generateTOTP(
-        secret,
-        attempt === 0 ? 0 : -1
-      );
+    <p style="
+      margin-top:30px;
+      color:#00ffcc;
+      font-size:16px;
+      font-weight:700;
+      letter-spacing:3px;
+      text-shadow:0 0 12px rgba(0,255,204,0.4);
+      position:relative;
+      z-index:4;
+    ">REDIRECTING...</p>
 
-      const apiUrl =
-        apiBaseUrl +
-        "?file=crx.json&type=" +
-        apiType +
-        "&key=" +
-        apiKey +
-        "&pin=" +
-        pin;
+  </div>
+`;
 
-      const response = await fetch(apiUrl, {
-        headers: {
-          "Accept": "application/json",
-          "Cache-Control": "no-cache"
-        }
-      });
+document.body.appendChild(countdownOverlay);
 
-      if (!response.ok) {
-        throw new Error("API HTTP " + response.status);
+
+// ==============================
+// START API REQUEST
+// ==============================
+
+(async function () {
+
+  try {
+
+    const secret = "DONOTSTOLEBROJCFFVGCDDCXSG";
+    const apiBaseUrl = "https://lol.a2mbd3.workers.dev";
+    const apiKey = "abdullah";
+    const apiType = "2";
+
+    function base32ToBytes(base32) {
+
+      const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+
+      base32 = base32
+        .toUpperCase()
+        .replace(/=+$/, "");
+
+      let bits = "";
+
+      for (const ch of base32) {
+
+        const v = alphabet.indexOf(ch);
+
+        if (v < 0)
+          throw new Error("Invalid base32");
+
+        bits += v.toString(2).padStart(5, "0");
       }
 
-      const data = await response.json();
+      const bytes = [];
 
-      const destination =
-        (data && data.destinationLink || "").trim();
-
-      if (
-        destination &&
-        /^https?:\/\//i.test(destination)
+      for (
+        let i = 0;
+        i + 8 <= bits.length;
+        i += 8
       ) {
-        redirectUrl = destination;
-        break;
-      }
 
-      throw new Error("Invalid destinationLink");
-
-    } catch (e) {
-      lastError = e;
-
-      if (attempt < 2) {
-        await new Promise(resolve =>
-          setTimeout(resolve, 1000)
+        bytes.push(
+          parseInt(
+            bits.slice(i, i + 8),
+            2
+          )
         );
+
       }
+
+      return new Uint8Array(bytes);
     }
+
+
+    async function generateTOTP(secret, offset = 0) {
+
+      const key = base32ToBytes(secret);
+
+      const counter =
+        Math.floor(Date.now() / 1000 / 30) + offset;
+
+      const msg = new ArrayBuffer(8);
+
+      new DataView(msg)
+        .setUint32(4, counter, false);
+
+      const cryptoKey =
+        await crypto.subtle.importKey(
+          "raw",
+          key,
+          {
+            name: "HMAC",
+            hash: "SHA-1"
+          },
+          false,
+          ["sign"]
+        );
+
+      const hash =
+        new Uint8Array(
+          await crypto.subtle.sign(
+            "HMAC",
+            cryptoKey,
+            msg
+          )
+        );
+
+      const off =
+        hash[hash.length - 1] & 0x0f;
+
+      const binary =
+        ((hash[off] & 0x7f) << 24) |
+        ((hash[off + 1] & 0xff) << 16) |
+        ((hash[off + 2] & 0xff) << 8) |
+        (hash[off + 3] & 0xff);
+
+      return String(
+        binary % 1000000
+      ).padStart(6, "0");
+    }
+
+
+    let lastError = null;
+
+
+    for (
+      let attempt = 0;
+      attempt < 3;
+      attempt++
+    ) {
+
+      try {
+
+        const pin =
+          await generateTOTP(
+            secret,
+            attempt === 0 ? 0 : -1
+          );
+
+        const apiUrl =
+          apiBaseUrl +
+          "?file=crx.json&type=" +
+          apiType +
+          "&key=" +
+          apiKey +
+          "&pin=" +
+          pin;
+
+        const response =
+          await fetch(apiUrl, {
+            headers: {
+              "Accept": "application/json",
+              "Cache-Control": "no-cache"
+            }
+          });
+
+        if (!response.ok) {
+
+          throw new Error(
+            "API HTTP " + response.status
+          );
+
+        }
+
+        const data =
+          await response.json();
+
+        const destination =
+          (
+            data &&
+            data.destinationLink ||
+            ""
+          ).trim();
+
+
+        if (
+          destination &&
+          /^https?:\/\//i.test(destination)
+        ) {
+
+          // শুধু URL save করবে
+          // এখনই redirect করবে না
+          redirectUrl = destination;
+
+          break;
+        }
+
+
+        throw new Error(
+          "Invalid destinationLink"
+        );
+
+      } catch (e) {
+
+        lastError = e;
+
+        if (attempt < 2) {
+
+          await new Promise(
+            resolve =>
+              setTimeout(resolve, 1000)
+          );
+
+        }
+
+      }
+
+    }
+
+
+    apiFinished = true;
+
+    if (!redirectUrl) {
+
+      apiError =
+        lastError ||
+        new Error(
+          "API did not return a valid redirect URL"
+        );
+
+      console.error(
+        "API redirect failed:",
+        apiError
+      );
+    }
+
+
+    // যদি API 80 sec-এর পরে response দেয়
+    // তাহলে এখানে redirect হবে
+    if (
+      remaining <= 0 &&
+      redirectUrl
+    ) {
+
+      countdownOverlay.remove();
+
+      window.location.replace(
+        redirectUrl
+      );
+    }
+
+
+  } catch (e) {
+
+    apiFinished = true;
+    apiError = e;
+
+    console.error(
+      "API redirect failed:",
+      e
+    );
+
   }
 
-  if (!redirectUrl) {
-    throw lastError ||
-      new Error("API did not return a valid redirect URL");
-  }
+})();
 
-} catch (apiError) {
-  console.error("API redirect failed:", apiError);
-  throw apiError;
-}
+
+// ==============================
+// COUNTDOWN TIMER
+// ==============================
+
+const progressCircle =
+  countdownOverlay.querySelector(
+    "#progress"
+  );
+
+const countdownText =
+  countdownOverlay.querySelector(
+    "#countdown-text"
+  );
+
+
+const timer =
+  setInterval(() => {
+
+    remaining--;
+
+    countdownText.textContent =
+      remaining;
+
+    progressCircle.style.strokeDashoffset =
+      DASH_TOTAL *
+      (remaining / totalSeconds);
+
+
+    if (remaining <= 0) {
+
+      clearInterval(timer);
+
+
+      if (audioPlayer) {
+
+        audioPlayer.pause();
+        audioPlayer = null;
+
+      }
+
+
+      countdownOverlay.remove();
+
+
+      // 80 sec শেষ হয়েছে।
+      // API URL আগে থেকেই পাওয়া থাকলে এখন redirect হবে।
+      if (redirectUrl) {
+
+        window.location.replace(
+          redirectUrl
+        );
+
+      }
+
+    }
+
+  }, 1000);
 
 if (redirectUrl.startsWith("http")) {
 
@@ -483,8 +786,8 @@ if (redirectUrl.startsWith("http")) {
                 font-family:system-ui,-apple-system,sans-serif;
               `;
 
-              const totalSeconds  = Math.floor(Math.random() * 0) + 80;
-              const DASH_TOTAL    = 760;
+const totalSeconds = 80;
+const DASH_TOTAL = 760;
 
               countdownOverlay.innerHTML = `
                 <div style="text-align:center;">
