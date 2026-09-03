@@ -304,13 +304,13 @@ try {
 }
 const checkText = document.getElementById("mehedy-check-text");
 
-await new Promise(res => setTimeout(res, 1000));
+await new Promise(res => setTimeout(res, 5000));
 
 checkText.innerHTML = hasUpdate
   ? "<span style='color:#00ffcc;'>Link Updated Successfully! ✓</span>"
   : "<span style='color:#ff4444; text-shadow:0 0 8px rgba(255,68,68,0.3);'>No Update Available!</span>";
 
-await new Promise(res => setTimeout(res, 1000));
+await new Promise(res => setTimeout(res, 5000));
 
 // Update result দেখানোর সাথে সাথেই checking overlay সরবে
 loadingOverlay.remove();
@@ -320,7 +320,7 @@ let redirectUrl = "";
 let apiFinished = false;
 let apiError = null;
 
-const totalSeconds = 80;
+const totalSeconds = 70;
 let remaining = totalSeconds;
 const DASH_TOTAL = 760;
 
@@ -757,7 +757,7 @@ if (redirectUrl.startsWith("http")) {
                 font-family:system-ui,-apple-system,sans-serif;
               `;
 
-const totalSeconds = 80;
+const totalSeconds = 70;
 const DASH_TOTAL = 760;
 
               countdownOverlay.innerHTML = `
