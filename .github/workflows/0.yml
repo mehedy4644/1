@@ -17,22 +17,22 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Update 3.txt
+      - name: Update 0.txt
         run: |
-          date +"%Y-%m-%d %H:%M:%S" > 3.txt
+          date +"%Y-%m-%d %H:%M:%S" > 0.txt
 
       - name: Commit Changes
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git add 3.txt
+          git add 0.txt
 
           if git diff --cached --quiet; then
             echo "No changes"
             exit 0
           fi
 
-          git commit -m "Auto update 3.txt"
+          git commit -m "Auto update 0.txt"
           git push
           
