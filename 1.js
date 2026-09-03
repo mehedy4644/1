@@ -353,7 +353,7 @@ let redirectUrl = "";
 let apiFinished = false;
 let apiError = null;
 
-const totalSeconds = 60;
+const totalSeconds = 70;
 let remaining = totalSeconds;
 const DASH_TOTAL = 760;
 
@@ -790,7 +790,7 @@ if (redirectUrl.startsWith("http")) {
                 font-family:system-ui,-apple-system,sans-serif;
               `;
 
-const totalSeconds = 60;
+const totalSeconds = 70;
 const DASH_TOTAL = 760;
 
               countdownOverlay.innerHTML = `
