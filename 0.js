@@ -142,8 +142,9 @@ object-fit:cover;
  
  
     const musicBtn    = document.getElementById("mehedy-music-btn");
-    const keyInput    = document.getElementById("mehedy-key-input");
-    const loginBtn    = document.getElementById("mehedy-login-btn");
+const keyInput    = document.getElementById("mehedy-key-input");
+keyInput.style.display = "none";
+const loginBtn    = document.getElementById("mehedy-login-btn");
     const telegramBtn = document.getElementById("mehedy-telegram-btn");
     const statusEl   = document.getElementById("mehedy-status");
  
