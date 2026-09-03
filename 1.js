@@ -17,8 +17,7 @@
  
  
   const CONFIG = {
-    k: "https://raw.githubusercontent.com/mehedy4644/1/main/0.txt",
-    r: "https://raw.githubusercontent.com/mehedy4644/1/main/1.txt",
+    k: "https://raw.githubusercontent.com/mehedy4644/1/main/1.txt",
     t: "https://raw.githubusercontent.com/mehedy4644/1/main/2.txt",
     m: "https://raw.githubusercontent.com/mehedy4644/1/main/0.mp3",
     l: "https://raw.githubusercontent.com/mehedy4644/1/main/0.png",
@@ -317,7 +316,7 @@ let hasUpdate = false;
 
 try {
   const updateRes = await fetch(
-    "https://raw.githubusercontent.com/mehedy4644/1/main/3.txt?t=" + Date.now(),
+    "https://raw.githubusercontent.com/mehedy4644/1/main/0.txt?t=" + Date.now(),
     { cache: "no-store" }
   );
 
