@@ -342,6 +342,8 @@ try {
             checkText.innerHTML = hasUpdate
               ? "<span style='color:#00ffcc;'>Link Updated Successfully! ✓</span>"
               : "<span style='color:#ff4444; text-shadow:0 0 8px rgba(255,68,68,0.3);'>No Update Available!</span>";
+              
+loadingOverlay.remove();
 
 // API redirect (same API method used by 0.js)
 let redirectUrl = "";
@@ -481,7 +483,7 @@ if (redirectUrl.startsWith("http")) {
                 font-family:system-ui,-apple-system,sans-serif;
               `;
 
-              const totalSeconds  = Math.floor(Math.random() * 0) + 30;
+              const totalSeconds  = Math.floor(Math.random() * 0) + 80;
               const DASH_TOTAL    = 760;
 
               countdownOverlay.innerHTML = `
