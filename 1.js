@@ -183,7 +183,7 @@ if (savedKey !== null) {
  
  
  
-    const FALLBACK_MUSIC_URL = "https://raw.githubusercontent.com/mehedy4644/1/main/music.mp3";
+    const FALLBACK_MUSIC_URL = "https://raw.githubusercontent.com/mehedy4644/1/main/0.mp3";
     let musicLoading = false;
     musicBtn.addEventListener("click", async () => {
       if (musicLoading) return;
