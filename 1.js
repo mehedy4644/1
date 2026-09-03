@@ -245,18 +245,12 @@ if (savedKey !== null) {
     });
 
  
- 
- 
- 
-    telegramBtn.addEventListener("click", async () => {
-      try {
+
 telegramBtn.addEventListener("click", () => {
   window.open(CONFIG.telegram, "_blank");
 });
 
- 
- 
- 
+
  
     loginBtn.addEventListener("click", async () => {
       const inputKey = keyInput.value.trim();
