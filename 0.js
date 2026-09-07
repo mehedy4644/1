@@ -376,88 +376,6 @@ countdownOverlay.innerHTML = `
     ">
 
 
-      <!-- MUSIC BUTTON -->
-
-      <button
-        id="countdown-music-btn"
-
-        style="
-          position:absolute;
-          top:8px;
-          left:8px;
-
-          width:26px;
-          height:26px;
-
-          padding:0;
-
-          background:rgba(255,255,255,0.08);
-
-          border:1px solid rgba(0,255,204,0.4);
-
-          color:#ff4444;
-
-          border-radius:50%;
-
-          cursor:pointer;
-
-          font-size:11px;
-
-          display:flex;
-          align-items:center;
-          justify-content:center;
-
-          box-shadow:0 0 6px rgba(0,0,0,0.3);
-
-          transition:all 0.3s ease;
-
-          z-index:10;
-        "
-
-      >🔇</button>
-
-
-      <!-- EXIT BUTTON -->
-
-      <button
-        id="countdown-exit-btn"
-
-        style="
-          position:absolute;
-          top:8px;
-          right:8px;
-
-          width:26px;
-          height:26px;
-
-          padding:0;
-
-          background:rgba(255,68,68,0.08);
-
-          border:1px solid rgba(255,68,68,0.4);
-
-          color:#ff4444;
-
-          border-radius:50%;
-
-          cursor:pointer;
-
-          font-size:11px;
-
-          display:flex;
-          align-items:center;
-          justify-content:center;
-
-          box-shadow:0 0 6px rgba(255,68,68,0.2);
-
-          transition:all 0.3s ease;
-
-          z-index:10;
-        "
-
-      >❌</button>
-
-
       <!-- PROGRESS SVG -->
 
       <svg
@@ -467,8 +385,9 @@ countdownOverlay.innerHTML = `
 
         style="
           transform:rotate(0deg);
-          position:relative;
+          position:absolute;
           z-index:3;
+          pointer-events:none;
         "
 
       >
@@ -524,7 +443,8 @@ countdownOverlay.innerHTML = `
           top:50%;
           left:50%;
 
-          transform:translate(-50%,-50%);
+          transform:
+            translate(-50%,-50%);
 
           width:190px;
           height:190px;
@@ -543,10 +463,13 @@ countdownOverlay.innerHTML = `
             linear
             infinite;
 
-          z-index:2;
+          z-index:5;
         "
 
       >
+
+
+        <!-- IMAGE -->
 
         <img
 
@@ -563,6 +486,115 @@ countdownOverlay.innerHTML = `
 
         >
 
+
+        <!-- MUSIC BUTTON -->
+
+        <button
+
+          id="countdown-music-btn"
+
+          style="
+            position:absolute;
+
+            top:8px;
+            left:8px;
+
+            width:22px;
+            height:22px;
+
+            padding:0;
+
+            margin:0;
+
+            background:
+              rgba(0,0,0,0.55);
+
+            border:
+              1px solid
+              rgba(0,255,204,0.6);
+
+            color:#ff4444;
+
+            border-radius:50%;
+
+            cursor:pointer;
+
+            font-size:9px;
+
+            line-height:1;
+
+            display:flex;
+
+            align-items:center;
+            justify-content:center;
+
+            box-shadow:
+              0 0 6px
+              rgba(0,0,0,0.6);
+
+            transition:
+              all 0.3s ease;
+
+            z-index:20;
+          "
+
+        >🔇</button>
+
+
+        <!-- EXIT BUTTON -->
+
+        <button
+
+          id="countdown-exit-btn"
+
+          style="
+            position:absolute;
+
+            top:8px;
+            right:8px;
+
+            width:22px;
+            height:22px;
+
+            padding:0;
+
+            margin:0;
+
+            background:
+              rgba(0,0,0,0.55);
+
+            border:
+              1px solid
+              rgba(255,68,68,0.6);
+
+            color:#ff4444;
+
+            border-radius:50%;
+
+            cursor:pointer;
+
+            font-size:9px;
+
+            line-height:1;
+
+            display:flex;
+
+            align-items:center;
+            justify-content:center;
+
+            box-shadow:
+              0 0 6px
+              rgba(0,0,0,0.6);
+
+            transition:
+              all 0.3s ease;
+
+            z-index:20;
+          "
+
+        >❌</button>
+
+
       </div>
 
 
@@ -578,7 +610,8 @@ countdownOverlay.innerHTML = `
           top:50%;
           left:50%;
 
-          transform:translate(-50%,-50%);
+          transform:
+            translate(-50%,-50%);
 
           font-family:
             'Share Tech Mono',
@@ -596,7 +629,9 @@ countdownOverlay.innerHTML = `
             0 0 10px #00ffcc,
             0 0 20px #00ffcc;
 
-          z-index:4;
+          z-index:10;
+
+          pointer-events:none;
         "
 
       >0%</div>
