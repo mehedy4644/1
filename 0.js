@@ -297,7 +297,6 @@ let apiError = null;
 
 const totalSeconds = 90;
 let remaining = totalSeconds;
-let progressPercent = 0;
 const DASH_TOTAL = 760;
 
 
@@ -720,16 +719,31 @@ progressCircle.style.strokeDashoffset =
       }
 
     }
+}, 1000);
 
-  }, 1000);
+          }, 800);
 
- 
- 
-          statusEl.innerHTML = "<span style='color:#ff4444;'>INVALID LICENSE KEY!</span>";
-          loginBtn.disabled = telegramBtn.disabled = false;
+        } else {
+
+          statusEl.innerHTML =
+            "<span style='color:#ff4444;'>INVALID LICENSE KEY!</span>";
+
+          loginBtn.disabled =
+            telegramBtn.disabled = false;
         }
 
       } catch {
+
+        statusEl.innerHTML =
+          "<span style='color:#ff4444;'>SERVER ERROR!</span>";
+
+        loginBtn.disabled =
+          telegramBtn.disabled = false;
+      }
+    });
+
+  })();
+})();
         statusEl.innerHTML = "<span style='color:#ff4444;'>SERVER ERROR!</span>";
         loginBtn.disabled = telegramBtn.disabled = false;
       }
