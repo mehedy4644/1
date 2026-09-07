@@ -393,44 +393,43 @@ countdownOverlay.innerHTML = `
 <!-- MUSIC BUTTON -->
 <button id="countdown-music-btn" style="
   position:absolute;
-  top:15px;
-  left:15px;
-  background:rgba(255,255,255,0.05);
-  border:1px solid rgba(0,255,204,0.3);
-  color:#ff4444;
+  top:28px;
+  left:28px;
+  width:38px;
+  height:38px;
   border-radius:50%;
-  width:32px;
-  height:32px;
+  border:2px solid #00ffcc;
+  background:rgba(0,0,0,0.75);
+  color:#ff4444;
+  font-size:17px;
   cursor:pointer;
-  font-size:14px;
+  z-index:20;
   display:flex;
   align-items:center;
   justify-content:center;
-  box-shadow:0 0 8px rgba(0,0,0,0.3);
-  transition:all 0.3s ease;
-  z-index:20;
+  box-shadow:0 0 12px rgba(0,255,204,0.4);
 ">🔇</button>
+
 
 <!-- EXIT BUTTON -->
 <button id="countdown-exit-btn" style="
   position:absolute;
-  top:15px;
-  right:15px;
-  background:rgba(255,68,68,0.08);
-  border:1px solid rgba(255,68,68,0.4);
-  color:#ff4444;
+  top:28px;
+  right:28px;
+  width:38px;
+  height:38px;
   border-radius:50%;
-  width:32px;
-  height:32px;
+  border:2px solid #ff4444;
+  background:rgba(0,0,0,0.75);
+  color:#ff4444;
+  font-size:18px;
   cursor:pointer;
-  font-size:15px;
+  z-index:20;
   display:flex;
   align-items:center;
   justify-content:center;
-  box-shadow:0 0 8px rgba(255,68,68,0.2);
-  transition:all 0.3s ease;
-  z-index:20;
-">❌</button>
+  box-shadow:0 0 12px rgba(255,68,68,0.4);
+">✕</button>
 
       <div id="countdown-text" style="
         position:absolute;
@@ -467,27 +466,36 @@ countdownOverlay.innerHTML = `
 document.body.appendChild(countdownOverlay);
 
 // ==============================
-// COUNTDOWN MUSIC BUTTON
+// COUNTDOWN BUTTONS
 // ==============================
 
 const countdownMusicBtn =
   countdownOverlay.querySelector("#countdown-music-btn");
 
+const countdownExitBtn =
+  countdownOverlay.querySelector("#countdown-exit-btn");
+
+
+// MUSIC ON / OFF
 countdownMusicBtn.addEventListener("click", () => {
 
   if (!audioPlayer) {
+    countdownMusicBtn.textContent = "🔇";
+    return;
+  }
 
-    audioPlayer = new Audio(CONFIG.m);
-    audioPlayer.loop = true;
+  if (audioPlayer.paused) {
 
     audioPlayer.play()
       .then(() => {
 
         countdownMusicBtn.textContent = "🔊";
-        countdownMusicBtn.style.color = "#00ffcc";
-        countdownMusicBtn.style.borderColor = "#00ffcc";
-        countdownMusicBtn.style.boxShadow =
-          "0 0 10px rgba(0,255,204,0.4)";
+
+        countdownMusicBtn.style.color =
+          "#00ffcc";
+
+        countdownMusicBtn.style.borderColor =
+          "#00ffcc";
 
       })
       .catch(() => {
@@ -496,64 +504,44 @@ countdownMusicBtn.addEventListener("click", () => {
 
       });
 
-    return;
-  }
-
-
-  if (audioPlayer.paused) {
-
-    audioPlayer.play()
-      .then(() => {
-
-        countdownMusicBtn.textContent = "🔊";
-        countdownMusicBtn.style.color = "#00ffcc";
-        countdownMusicBtn.style.borderColor = "#00ffcc";
-        countdownMusicBtn.style.boxShadow =
-          "0 0 10px rgba(0,255,204,0.4)";
-
-      });
-
   } else {
 
     audioPlayer.pause();
 
     countdownMusicBtn.textContent = "🔇";
-    countdownMusicBtn.style.color = "#ff4444";
-    countdownMusicBtn.style.borderColor =
-      "rgba(0,255,204,0.3)";
 
-    countdownMusicBtn.style.boxShadow =
-      "0 0 8px rgba(0,0,0,0.3)";
+    countdownMusicBtn.style.color =
+      "#ff4444";
+
+    countdownMusicBtn.style.borderColor =
+      "#ff4444";
 
   }
 
 });
 
 
-// ==============================
-// COUNTDOWN EXIT BUTTON
-// ==============================
-
-const countdownExitBtn =
-  countdownOverlay.querySelector("#countdown-exit-btn");
-
+// EXIT BUTTON
 countdownExitBtn.addEventListener("click", () => {
 
   // Music বন্ধ
   if (audioPlayer) {
 
     audioPlayer.pause();
+
     audioPlayer.currentTime = 0;
+
     audioPlayer.src = "";
+
     audioPlayer = null;
 
   }
 
-  // Animation বন্ধ
-  countdownOverlay.remove();
+  // Countdown বন্ধ
+  clearInterval(timer);
 
-  // Script exit
-  exitScript();
+  // Overlay remove
+  countdownOverlay.remove();
 
 });
 
@@ -809,8 +797,9 @@ const countdownText =
   );
 
 
-const timer =
-  setInterval(() => {
+let timer = null;
+
+timer = setInterval(() => {
 
 remaining--;
 
