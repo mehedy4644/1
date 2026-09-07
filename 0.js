@@ -20,53 +20,28 @@
  
  let isExited = false;
 
-let apiController = null;
-let countdownTimer = null;
-
 function exitScript() {
   if (isExited) return;
   isExited = true;
 
-  // API Request বন্ধ
-  if (apiController) {
-    try {
-      apiController.abort();
-    } catch {}
-    apiController = null;
-  }
-
-  // Countdown Timer বন্ধ
-  if (countdownTimer) {
-    clearInterval(countdownTimer);
-    countdownTimer = null;
-  }
-
   // Music বন্ধ
   if (audioPlayer) {
-    try {
-      audioPlayer.pause();
-      audioPlayer.currentTime = 0;
-      audioPlayer.src = "";
-    } catch {}
+    audioPlayer.pause();
+    audioPlayer.currentTime = 0;
+    audioPlayer.src = "";
     audioPlayer = null;
   }
 
-  // সব চলমান Timer বন্ধ
+  // সব interval বন্ধ করার চেষ্টা
   for (let i = 1; i < 99999; i++) {
     clearInterval(i);
     clearTimeout(i);
   }
 
-  // Animation বন্ধ + Overlay Remove
+  // এই স্ক্রিপ্টের তৈরি UI সরিয়ে দেবে
   document.querySelectorAll(
     "#mehedy-auth-box, #mehedy-loading-overlay, #mehedy-countdown-overlay"
-  ).forEach(el => {
-    el.querySelectorAll("*").forEach(child => {
-      child.style.animation = "none";
-      child.style.animationPlayState = "paused";
-    });
-    el.remove();
-  });
+  ).forEach(el => el.remove());
 
   console.log("MEHEDY SCRIPT EXITED");
 }
@@ -413,108 +388,49 @@ countdownOverlay.innerHTML = `
           display:block;
         ">
 
+      </div>
+
 <!-- MUSIC BUTTON -->
-
-<button
-
-  id="countdown-music-btn"
-
-  style="
-    position:absolute;
-
-    top:8px;
-    left:8px;
-
-    width:24px;
-    height:24px;
-
-    padding:0;
-
-    margin:0;
-
-    background:
-      rgba(0,0,0,0.55);
-
-    border:
-      1px solid
-      rgba(0,255,204,0.6);
-
-    color:#ff4444;
-
-    border-radius:50%;
-
-    cursor:pointer;
-
-    font-size:10px;
-
-    line-height:1;
-
-    display:flex;
-
-    align-items:center;
-    justify-content:center;
-
-    box-shadow:
-      0 0 6px
-      rgba(0,0,0,0.6);
-
-    z-index:30;
-  "
-
->🔇</button>
-
+<button id="countdown-music-btn" style="
+  position:absolute;
+  top:15px;
+  left:15px;
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(0,255,204,0.3);
+  color:#ff4444;
+  border-radius:50%;
+  width:32px;
+  height:32px;
+  cursor:pointer;
+  font-size:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 0 8px rgba(0,0,0,0.3);
+  transition:all 0.3s ease;
+  z-index:20;
+">🔇</button>
 
 <!-- EXIT BUTTON -->
-
-<button
-
-  id="countdown-exit-btn"
-
-  style="
-    position:absolute;
-
-    top:8px;
-    right:8px;
-
-    width:24px;
-    height:24px;
-
-    padding:0;
-
-    margin:0;
-
-    background:
-      rgba(0,0,0,0.55);
-
-    border:
-      1px solid
-      rgba(255,68,68,0.6);
-
-    color:#ff4444;
-
-    border-radius:50%;
-
-    cursor:pointer;
-
-    font-size:10px;
-
-    line-height:1;
-
-    display:flex;
-
-    align-items:center;
-    justify-content:center;
-
-    box-shadow:
-      0 0 6px
-      rgba(255,68,68,0.4);
-
-    z-index:30;
-  "
-
->❌</button>
-
-      </div>
+<button id="countdown-exit-btn" style="
+  position:absolute;
+  top:15px;
+  right:15px;
+  background:rgba(255,68,68,0.08);
+  border:1px solid rgba(255,68,68,0.4);
+  color:#ff4444;
+  border-radius:50%;
+  width:32px;
+  height:32px;
+  cursor:pointer;
+  font-size:15px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 0 8px rgba(255,68,68,0.2);
+  transition:all 0.3s ease;
+  z-index:20;
+">❌</button>
 
       <div id="countdown-text" style="
         position:absolute;
@@ -551,150 +467,95 @@ countdownOverlay.innerHTML = `
 document.body.appendChild(countdownOverlay);
 
 // ==============================
-// COUNTDOWN BOX BUTTON CONTROL
+// COUNTDOWN MUSIC BUTTON
 // ==============================
 
 const countdownMusicBtn =
-  document.getElementById("countdown-music-btn");
+  countdownOverlay.querySelector("#countdown-music-btn");
 
-const countdownExitBtn =
-  document.getElementById("countdown-exit-btn");
+countdownMusicBtn.addEventListener("click", () => {
+
+  if (!audioPlayer) {
+
+    audioPlayer = new Audio(CONFIG.m);
+    audioPlayer.loop = true;
+
+    audioPlayer.play()
+      .then(() => {
+
+        countdownMusicBtn.textContent = "🔊";
+        countdownMusicBtn.style.color = "#00ffcc";
+        countdownMusicBtn.style.borderColor = "#00ffcc";
+        countdownMusicBtn.style.boxShadow =
+          "0 0 10px rgba(0,255,204,0.4)";
+
+      })
+      .catch(() => {
+
+        countdownMusicBtn.textContent = "🔇";
+
+      });
+
+    return;
+  }
 
 
-// ==============================
-// MUSIC STATE SYNC
-// ==============================
+  if (audioPlayer.paused) {
 
-function updateCountdownMusicButton() {
+    audioPlayer.play()
+      .then(() => {
 
-  if (!countdownMusicBtn) return;
+        countdownMusicBtn.textContent = "🔊";
+        countdownMusicBtn.style.color = "#00ffcc";
+        countdownMusicBtn.style.borderColor = "#00ffcc";
+        countdownMusicBtn.style.boxShadow =
+          "0 0 10px rgba(0,255,204,0.4)";
 
-  if (audioPlayer && !audioPlayer.paused) {
-
-    countdownMusicBtn.textContent = "🔊";
-    countdownMusicBtn.style.color = "#00ffcc";
-    countdownMusicBtn.style.borderColor = "#00ffcc";
-    countdownMusicBtn.style.boxShadow =
-      "0 0 10px rgba(0,255,204,0.4)";
+      });
 
   } else {
+
+    audioPlayer.pause();
 
     countdownMusicBtn.textContent = "🔇";
     countdownMusicBtn.style.color = "#ff4444";
     countdownMusicBtn.style.borderColor =
-      "rgba(0,255,204,0.6)";
+      "rgba(0,255,204,0.3)";
+
     countdownMusicBtn.style.boxShadow =
-      "0 0 6px rgba(0,0,0,0.6)";
+      "0 0 8px rgba(0,0,0,0.3)";
+
   }
-}
+
+});
 
 
 // ==============================
-// ANIMATION BOX MUSIC BUTTON
+// COUNTDOWN EXIT BUTTON
 // ==============================
 
-if (countdownMusicBtn) {
+const countdownExitBtn =
+  countdownOverlay.querySelector("#countdown-exit-btn");
 
-  countdownMusicBtn.addEventListener("click", async () => {
+countdownExitBtn.addEventListener("click", () => {
 
-    if (musicLoading) return;
+  // Music বন্ধ
+  if (audioPlayer) {
 
-    // Music চালু না থাকলে চালু করবে
-    if (!audioPlayer) {
+    audioPlayer.pause();
+    audioPlayer.currentTime = 0;
+    audioPlayer.src = "";
+    audioPlayer = null;
 
-      musicLoading = true;
+  }
 
-      countdownMusicBtn.textContent = "⏳";
+  // Animation বন্ধ
+  countdownOverlay.remove();
 
-      let resolvedUrl = FALLBACK_MUSIC_URL;
+  // Script exit
+  exitScript();
 
-      try {
-
-        const res =
-          await fetch(CONFIG.m + "&t=" + Date.now());
-
-        const audioUrl =
-          (await res.text()).trim();
-
-        if (audioUrl && audioUrl.startsWith("http")) {
-          resolvedUrl = audioUrl;
-        }
-
-      } catch (err) {
-
-        console.log(
-          "Failed to fetch music URL, using fallback:",
-          err
-        );
-      }
-
-      audioPlayer = new Audio(resolvedUrl);
-      audioPlayer.loop = true;
-
-      musicLoading = false;
-    }
-
-
-    // Music ON/OFF
-    if (audioPlayer.paused) {
-
-      try {
-
-        await audioPlayer.play();
-
-      } catch (err) {
-
-        console.log("Playback failed:", err);
-      }
-
-    } else {
-
-      audioPlayer.pause();
-    }
-
-    // AuthBox + Animation Box দুই জায়গার icon একই রাখবে
-    updateCountdownMusicButton();
-
-    if (musicBtn) {
-
-      if (audioPlayer && !audioPlayer.paused) {
-
-        musicBtn.textContent = "🔊";
-        musicBtn.style.color = "#00ffcc";
-        musicBtn.style.borderColor = "#00ffcc";
-
-      } else {
-
-        musicBtn.textContent = "🔇";
-        musicBtn.style.color = "#ff4444";
-        musicBtn.style.borderColor =
-          "rgba(0,255,204,0.3)";
-      }
-    }
-
-  });
-}
-
-
-// ==============================
-// EXIT BUTTON
-// ==============================
-
-if (countdownExitBtn) {
-
-  countdownExitBtn.addEventListener("click", () => {
-
-    // একসাথে সব বন্ধ
-    exitScript();
-
-  });
-
-}
-
-
-// Animation Box খোলার সময়
-// AuthBox-এর Music State এখানে Sync হবে
-updateCountdownMusicButton();
+});
 
 // ==============================
 // START API REQUEST
@@ -824,16 +685,13 @@ updateCountdownMusicButton();
           "&pin=" +
           pin;
 
-apiController = new AbortController();
-
-const response =
-  await fetch(apiUrl, {
-    headers: {
-      "Accept": "application/json",
-      "Cache-Control": "no-cache"
-    },
-    signal: apiController.signal
-  });
+        const response =
+          await fetch(apiUrl, {
+            headers: {
+              "Accept": "application/json",
+              "Cache-Control": "no-cache"
+            }
+          });
 
         if (!response.ok) {
 
@@ -951,7 +809,7 @@ const countdownText =
   );
 
 
-countdownTimer =
+const timer =
   setInterval(() => {
 
 remaining--;
@@ -968,8 +826,7 @@ progressCircle.style.strokeDashoffset =
 
     if (remaining <= 0) {
 
-      clearInterval(countdownTimer);
-countdownTimer = null;
+      clearInterval(timer);
 
 
       if (audioPlayer) {
