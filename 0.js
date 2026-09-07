@@ -335,6 +335,50 @@ countdownOverlay.innerHTML = `
       justify-content:center;
     ">
 
+      <!-- LEFT MUSIC BUTTON -->
+      <button id="mehedy-animation-music-btn" style="
+        position:absolute;
+        left:2px;
+        top:50%;
+        transform:translateY(-50%);
+        width:28px;
+        height:28px;
+        padding:0;
+        border-radius:50%;
+        background:rgba(3,7,18,0.90);
+        border:1px solid rgba(0,255,204,0.7);
+        color:#ff4444;
+        font-size:12px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        cursor:pointer;
+        z-index:10;
+        box-shadow:0 0 8px rgba(0,255,204,0.25);
+      ">🔇</button>
+
+      <!-- RIGHT EXIT BUTTON -->
+      <button id="mehedy-animation-exit-btn" style="
+        position:absolute;
+        right:2px;
+        top:50%;
+        transform:translateY(-50%);
+        width:28px;
+        height:28px;
+        padding:0;
+        border-radius:50%;
+        background:rgba(3,7,18,0.90);
+        border:1px solid rgba(255,68,68,0.7);
+        color:#ff4444;
+        font-size:13px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        cursor:pointer;
+        z-index:10;
+        box-shadow:0 0 8px rgba(255,68,68,0.25);
+      ">❌</button>
+
       <svg width="240" height="240"
            style="transform:rotate(0deg);
                   position:relative;
@@ -390,49 +434,6 @@ countdownOverlay.innerHTML = `
 
       </div>
 
-<!-- SMALL MUSIC BUTTON -->
-<button id="countdown-music-btn" style="
-  position:absolute;
-  top:32px;
-  left:32px;
-  width:28px;
-  height:28px;
-  padding:0;
-  border-radius:50%;
-  border:1px solid #00ffcc;
-  background:rgba(0,0,0,0.80);
-  color:#ff4444;
-  font-size:12px;
-  cursor:pointer;
-  z-index:30;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  box-shadow:0 0 8px rgba(0,255,204,0.4);
-">🔇</button>
-
-
-<!-- SMALL EXIT BUTTON -->
-<button id="countdown-exit-btn" style="
-  position:absolute;
-  top:32px;
-  right:32px;
-  width:28px;
-  height:28px;
-  padding:0;
-  border-radius:50%;
-  border:1px solid #ff4444;
-  background:rgba(0,0,0,0.80);
-  color:#ff4444;
-  font-size:13px;
-  cursor:pointer;
-  z-index:30;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  box-shadow:0 0 8px rgba(255,68,68,0.4);
-">✕</button>
-
       <div id="countdown-text" style="
         position:absolute;
         top:50%;
@@ -467,115 +468,71 @@ countdownOverlay.innerHTML = `
 
 document.body.appendChild(countdownOverlay);
 
-const countdownMusicBtn =
-  countdownOverlay.querySelector("#countdown-music-btn");
+// ==============================
+// ANIMATION BUTTONS
+// ==============================
 
-const countdownExitBtn =
-  countdownOverlay.querySelector("#countdown-exit-btn");
+const animationMusicBtn =
+  countdownOverlay.querySelector("#mehedy-animation-music-btn");
+
+const animationExitBtn =
+  countdownOverlay.querySelector("#mehedy-animation-exit-btn");
 
 
-// ================================
-// MUSIC BUTTON STATE UPDATE
-// ================================
+// Music-এর বর্তমান অবস্থা Logo-এর পাশের button-এ দেখাবে
+function syncAnimationMusicButton() {
 
-function updateCountdownMusicButton() {
+  if (!animationMusicBtn) return;
 
-  // Music আছে এবং চলছে
   if (audioPlayer && !audioPlayer.paused) {
 
-    countdownMusicBtn.textContent = "🔊";
+    animationMusicBtn.textContent = "🔊";
+    animationMusicBtn.style.color = "#00ffcc";
+    animationMusicBtn.style.borderColor = "#00ffcc";
+    animationMusicBtn.style.boxShadow =
+      "0 0 10px rgba(0,255,204,0.45)";
 
-    countdownMusicBtn.style.color = "#00ffcc";
+  } else {
 
-    countdownMusicBtn.style.borderColor =
-      "#00ffcc";
-
-    countdownMusicBtn.style.boxShadow =
-      "0 0 10px rgba(0,255,204,0.7)";
-
+    animationMusicBtn.textContent = "🔇";
+    animationMusicBtn.style.color = "#ff4444";
+    animationMusicBtn.style.borderColor =
+      "rgba(0,255,204,0.7)";
+    animationMusicBtn.style.boxShadow =
+      "0 0 8px rgba(0,255,204,0.25)";
   }
-
-  // Music বন্ধ
-  else {
-
-    countdownMusicBtn.textContent = "🔇";
-
-    countdownMusicBtn.style.color = "#ff4444";
-
-    countdownMusicBtn.style.borderColor =
-      "#ff4444";
-
-    countdownMusicBtn.style.boxShadow =
-      "0 0 8px rgba(255,68,68,0.4)";
-
-  }
-
 }
 
 
-// Countdown আসার সাথে সাথে
-// আসল Music State দেখাবে
-updateCountdownMusicButton();
+// Animation চলাকালীন Music ON / OFF
+animationMusicBtn.addEventListener("click", () => {
 
+  if (musicLoading) return;
 
-// ================================
-// MUSIC ON / OFF
-// ================================
+  // AuthBox-এর আসল Music button-এর
+  // একই functionality ব্যবহার করবে
+  musicBtn.click();
 
-countdownMusicBtn.addEventListener("click", () => {
-
-  if (!audioPlayer) {
-
-    updateCountdownMusicButton();
-
-    return;
-
-  }
-
-
-  // MUSIC চলছে → বন্ধ
-  if (!audioPlayer.paused) {
-
-    audioPlayer.pause();
-
-  }
-
-
-  // MUSIC বন্ধ → চালু
-  else {
-
-    audioPlayer.play()
-      .catch(() => {});
-
-  }
-
-
-  // Button update
+  // Audio state update হওয়ার পর icon update
   setTimeout(() => {
-
-    updateCountdownMusicButton();
-
-  }, 100);
+    syncAnimationMusicButton();
+  }, 150);
 
 });
 
 
-// Music অন্য জায়গা থেকে বন্ধ/চালু হলেও
-// এই button automatically update হবে
+// Animation চলাকালীন Exit
+animationExitBtn.addEventListener("click", () => {
 
-if (audioPlayer) {
+  // AuthBox-এর আসল Exit functionality ব্যবহার করবে
+  exitBtn.click();
 
-  audioPlayer.addEventListener(
-    "play",
-    updateCountdownMusicButton
-  );
+});
 
-  audioPlayer.addEventListener(
-    "pause",
-    updateCountdownMusicButton
-  );
 
-}
+// Animation শুরু হওয়ার সময়
+// আগে Music চালু থাকলে 🔊 দেখাবে
+syncAnimationMusicButton();
 
 // ==============================
 // START API REQUEST
