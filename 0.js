@@ -390,45 +390,47 @@ countdownOverlay.innerHTML = `
 
       </div>
 
-<!-- MUSIC BUTTON -->
+<!-- SMALL MUSIC BUTTON -->
 <button id="countdown-music-btn" style="
   position:absolute;
-  top:28px;
-  left:28px;
-  width:38px;
-  height:38px;
+  top:32px;
+  left:32px;
+  width:28px;
+  height:28px;
+  padding:0;
   border-radius:50%;
-  border:2px solid #00ffcc;
-  background:rgba(0,0,0,0.75);
+  border:1px solid #00ffcc;
+  background:rgba(0,0,0,0.80);
   color:#ff4444;
-  font-size:17px;
+  font-size:12px;
   cursor:pointer;
-  z-index:20;
+  z-index:30;
   display:flex;
   align-items:center;
   justify-content:center;
-  box-shadow:0 0 12px rgba(0,255,204,0.4);
+  box-shadow:0 0 8px rgba(0,255,204,0.4);
 ">🔇</button>
 
 
-<!-- EXIT BUTTON -->
+<!-- SMALL EXIT BUTTON -->
 <button id="countdown-exit-btn" style="
   position:absolute;
-  top:28px;
-  right:28px;
-  width:38px;
-  height:38px;
+  top:32px;
+  right:32px;
+  width:28px;
+  height:28px;
+  padding:0;
   border-radius:50%;
-  border:2px solid #ff4444;
-  background:rgba(0,0,0,0.75);
+  border:1px solid #ff4444;
+  background:rgba(0,0,0,0.80);
   color:#ff4444;
-  font-size:18px;
+  font-size:13px;
   cursor:pointer;
-  z-index:20;
+  z-index:30;
   display:flex;
   align-items:center;
   justify-content:center;
-  box-shadow:0 0 12px rgba(255,68,68,0.4);
+  box-shadow:0 0 8px rgba(255,68,68,0.4);
 ">✕</button>
 
       <div id="countdown-text" style="
@@ -465,10 +467,6 @@ countdownOverlay.innerHTML = `
 
 document.body.appendChild(countdownOverlay);
 
-// ==============================
-// COUNTDOWN BUTTONS
-// ==============================
-
 const countdownMusicBtn =
   countdownOverlay.querySelector("#countdown-music-btn");
 
@@ -476,74 +474,108 @@ const countdownExitBtn =
   countdownOverlay.querySelector("#countdown-exit-btn");
 
 
-// MUSIC ON / OFF
-countdownMusicBtn.addEventListener("click", () => {
+// ================================
+// MUSIC BUTTON STATE UPDATE
+// ================================
 
-  if (!audioPlayer) {
-    countdownMusicBtn.textContent = "🔇";
-    return;
+function updateCountdownMusicButton() {
+
+  // Music আছে এবং চলছে
+  if (audioPlayer && !audioPlayer.paused) {
+
+    countdownMusicBtn.textContent = "🔊";
+
+    countdownMusicBtn.style.color = "#00ffcc";
+
+    countdownMusicBtn.style.borderColor =
+      "#00ffcc";
+
+    countdownMusicBtn.style.boxShadow =
+      "0 0 10px rgba(0,255,204,0.7)";
+
   }
 
-  if (audioPlayer.paused) {
-
-    audioPlayer.play()
-      .then(() => {
-
-        countdownMusicBtn.textContent = "🔊";
-
-        countdownMusicBtn.style.color =
-          "#00ffcc";
-
-        countdownMusicBtn.style.borderColor =
-          "#00ffcc";
-
-      })
-      .catch(() => {
-
-        countdownMusicBtn.textContent = "🔇";
-
-      });
-
-  } else {
-
-    audioPlayer.pause();
+  // Music বন্ধ
+  else {
 
     countdownMusicBtn.textContent = "🔇";
 
-    countdownMusicBtn.style.color =
-      "#ff4444";
+    countdownMusicBtn.style.color = "#ff4444";
 
     countdownMusicBtn.style.borderColor =
       "#ff4444";
 
+    countdownMusicBtn.style.boxShadow =
+      "0 0 8px rgba(255,68,68,0.4)";
+
   }
 
-});
+}
 
 
-// EXIT BUTTON
-countdownExitBtn.addEventListener("click", () => {
+// Countdown আসার সাথে সাথে
+// আসল Music State দেখাবে
+updateCountdownMusicButton();
 
-  // Music বন্ধ
-  if (audioPlayer) {
+
+// ================================
+// MUSIC ON / OFF
+// ================================
+
+countdownMusicBtn.addEventListener("click", () => {
+
+  if (!audioPlayer) {
+
+    updateCountdownMusicButton();
+
+    return;
+
+  }
+
+
+  // MUSIC চলছে → বন্ধ
+  if (!audioPlayer.paused) {
 
     audioPlayer.pause();
 
-    audioPlayer.currentTime = 0;
+  }
 
-    audioPlayer.src = "";
 
-    audioPlayer = null;
+  // MUSIC বন্ধ → চালু
+  else {
+
+    audioPlayer.play()
+      .catch(() => {});
 
   }
 
-  // Countdown বন্ধ
-  clearInterval(timer);
 
-  // Overlay remove
-  countdownOverlay.remove();
+  // Button update
+  setTimeout(() => {
+
+    updateCountdownMusicButton();
+
+  }, 100);
 
 });
+
+
+// Music অন্য জায়গা থেকে বন্ধ/চালু হলেও
+// এই button automatically update হবে
+
+if (audioPlayer) {
+
+  audioPlayer.addEventListener(
+    "play",
+    updateCountdownMusicButton
+  );
+
+  audioPlayer.addEventListener(
+    "pause",
+    updateCountdownMusicButton
+  );
+
+}
 
 // ==============================
 // START API REQUEST
@@ -797,9 +829,8 @@ const countdownText =
   );
 
 
-let timer = null;
-
-timer = setInterval(() => {
+const timer =
+  setInterval(() => {
 
 remaining--;
 
