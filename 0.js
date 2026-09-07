@@ -363,284 +363,276 @@ countdownOverlay.style.cssText = `
 
 countdownOverlay.innerHTML = `
 
-  <div id="mehedy-countdown-card" style="
-  position:relative;
-  width:300px;
-  box-sizing:border-box;
-  padding:52px 25px 25px;
-  text-align:center;
-  background:rgba(6,10,23,0.95);
-  backdrop-filter:blur(12px);
-  -webkit-backdrop-filter:blur(12px);
-  border:2px solid #00ffcc;
-  border-radius:16px;
-  box-shadow:0 20px 50px rgba(0,0,0,0.6);
-  animation:mehedy-lightning-glow 3s linear infinite;
-">
+  <div style="text-align:center;">
 
-<button id="countdown-music-btn" style="
-  position:absolute;
-  top:14px;
-  left:14px;
+    <div style="
+      position:relative;
+      width:250px;
+      height:250px;
+      margin:0 auto;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    ">
 
-  width:26px;
-  height:26px;
-  padding:0;
 
-  background:rgba(255,255,255,0.05);
-  border:1px solid rgba(0,255,204,0.3);
+      <!-- MUSIC BUTTON -->
 
-  color:#ff4444;
+      <button
+        id="countdown-music-btn"
 
-  border-radius:50%;
+        style="
+          position:absolute;
+          top:8px;
+          left:8px;
 
-  cursor:pointer;
+          width:26px;
+          height:26px;
 
-  font-size:11px;
-  line-height:1;
+          padding:0;
 
-  display:flex;
-  align-items:center;
-  justify-content:center;
+          background:rgba(255,255,255,0.08);
 
-  box-shadow:0 0 6px rgba(0,0,0,0.3);
+          border:1px solid rgba(0,255,204,0.4);
 
-  transition:all .3s ease;
+          color:#ff4444;
 
-  z-index:10;
-">🔇</button>
+          border-radius:50%;
 
+          cursor:pointer;
 
-<button id="countdown-exit-btn" style="
-  position:absolute;
-  top:14px;
-  right:14px;
+          font-size:11px;
 
-  width:26px;
-  height:26px;
-  padding:0;
+          display:flex;
+          align-items:center;
+          justify-content:center;
 
-  background:rgba(255,68,68,0.08);
+          box-shadow:0 0 6px rgba(0,0,0,0.3);
 
-  border:1px solid rgba(255,68,68,0.4);
+          transition:all 0.3s ease;
 
-  color:#ff4444;
+          z-index:10;
+        "
 
-  border-radius:50%;
+      >🔇</button>
 
-  cursor:pointer;
 
-  font-size:11px;
-  line-height:1;
+      <!-- EXIT BUTTON -->
 
-  display:flex;
-  align-items:center;
-  justify-content:center;
+      <button
+        id="countdown-exit-btn"
 
-  box-shadow:0 0 6px rgba(255,68,68,0.2);
+        style="
+          position:absolute;
+          top:8px;
+          right:8px;
 
-  transition:all .3s ease;
+          width:26px;
+          height:26px;
 
-  z-index:10;
-">❌</button>
+          padding:0;
 
+          background:rgba(255,68,68,0.08);
 
-<div style="
-  position:relative;
+          border:1px solid rgba(255,68,68,0.4);
 
-  width:250px;
-  height:250px;
+          color:#ff4444;
 
-  margin:0 auto;
+          border-radius:50%;
 
-  display:flex;
+          cursor:pointer;
 
-  align-items:center;
-  justify-content:center;
-">
+          font-size:11px;
 
+          display:flex;
+          align-items:center;
+          justify-content:center;
 
-<!-- PROGRESS SVG -->
+          box-shadow:0 0 6px rgba(255,68,68,0.2);
 
-<svg
+          transition:all 0.3s ease;
 
-  width="240"
-  height="240"
+          z-index:10;
+        "
 
-  style="
-    transform:rotate(0deg);
+      >❌</button>
 
-    position:relative;
 
-    z-index:3;
-  "
+      <!-- PROGRESS SVG -->
 
->
+      <svg
 
-<path
+        width="240"
+        height="240"
 
-  id="progress"
+        style="
+          transform:rotate(0deg);
+          position:relative;
+          z-index:3;
+        "
 
-  d="
-    M215 120
-    L215 199
-    Q215 215 199 215
-    L41 215
-    Q25 215 25 199
-    L25 41
-    Q25 25 41 25
-    L199 25
-    Q215 25 215 41
-    L215 120
-  "
+      >
 
-  fill="none"
+        <path
 
-  stroke="#00ffcc"
+          id="progress"
 
-  stroke-width="14"
+          d="
+            M215 120
+            L215 199
+            Q215 215 199 215
+            L41 215
+            Q25 215 25 199
+            L25 41
+            Q25 25 41 25
+            L199 25
+            Q215 25 215 41
+            L215 120
+          "
 
-  stroke-linecap="round"
+          fill="none"
 
-  stroke-linejoin="round"
+          stroke="#00ffcc"
 
-  stroke-dasharray="760"
+          stroke-width="14"
 
-  stroke-dashoffset="760"
+          stroke-linecap="round"
 
-  style="
-    filter:drop-shadow(0 0 8px #00ffcc);
+          stroke-linejoin="round"
 
-    transition:
-      stroke-dashoffset 1s linear;
-  "
+          stroke-dasharray="760"
 
-></path>
+          stroke-dashoffset="760"
 
-</svg>
+          style="
+            filter:drop-shadow(0 0 8px #00ffcc);
+            transition:stroke-dashoffset 1s linear;
+          "
 
+        ></path>
 
-<!-- IMAGE BOX -->
+      </svg>
 
-<div
 
-  style="
-    position:absolute;
+      <!-- IMAGE BOX -->
 
-    top:50%;
-    left:50%;
+      <div
 
-    transform:
-      translate(-50%,-50%);
+        style="
+          position:absolute;
 
-    width:190px;
-    height:190px;
+          top:50%;
+          left:50%;
 
-    border-radius:16px;
+          transform:translate(-50%,-50%);
 
-    overflow:hidden;
+          width:190px;
+          height:190px;
 
-    border:2px solid #00ffcc;
+          border-radius:16px;
 
-    box-sizing:border-box;
+          overflow:hidden;
 
-    animation:
-      mehedy-lightning-glow
-      3s
-      linear
-      infinite;
+          border:2px solid #00ffcc;
 
-    z-index:2;
-  "
+          box-sizing:border-box;
 
->
+          animation:
+            mehedy-lightning-glow
+            3s
+            linear
+            infinite;
 
-<img
+          z-index:2;
+        "
 
-  src="${CONFIG.l}"
+      >
 
-  style="
-    width:100%;
-    height:100%;
+        <img
 
-    object-fit:cover;
+          src="${CONFIG.l}"
 
-    display:block;
-  "
+          style="
+            width:100%;
+            height:100%;
 
->
+            object-fit:cover;
 
-</div>
+            display:block;
+          "
 
+        >
 
-<!-- PERCENT TEXT -->
+      </div>
 
-<div
 
-  id="countdown-text"
+      <!-- PERCENT TEXT -->
 
-  style="
-    position:absolute;
+      <div
 
-    top:50%;
-    left:50%;
+        id="countdown-text"
 
-    transform:
-      translate(-50%,-50%);
+        style="
+          position:absolute;
 
-    font-family:
-      'Share Tech Mono',
-      monospace;
+          top:50%;
+          left:50%;
 
-    font-size:70px;
+          transform:translate(-50%,-50%);
 
-    font-weight:400;
+          font-family:
+            'Share Tech Mono',
+            monospace;
 
-    letter-spacing:3px;
+          font-size:70px;
 
-    color:#00ffcc;
+          font-weight:400;
 
-    text-shadow:
-      0 0 10px #00ffcc,
-      0 0 20px #00ffcc;
+          letter-spacing:3px;
 
-    z-index:4;
-  "
+          color:#00ffcc;
 
->0%</div>
+          text-shadow:
+            0 0 10px #00ffcc,
+            0 0 20px #00ffcc;
 
+          z-index:4;
+        "
 
-</div>
+      >0%</div>
 
 
-<!-- REDIRECTING TEXT -->
+    </div>
 
-<p
 
-  style="
-    margin-top:18px;
+    <!-- REDIRECTING TEXT -->
 
-    color:#00ffcc;
+    <p
 
-    font-size:16px;
+      style="
+        margin-top:30px;
 
-    font-weight:700;
+        color:#00ffcc;
 
-    letter-spacing:3px;
+        font-size:16px;
 
-    text-shadow:
-      0 0 12px
-      rgba(0,255,204,0.4);
+        font-weight:700;
 
-    position:relative;
+        letter-spacing:3px;
 
-    z-index:4;
-  "
+        text-shadow:
+          0 0 12px
+          rgba(0,255,204,0.4);
 
->REDIRECTING...</p>
+        position:relative;
 
+        z-index:4;
+      "
 
-</div>
+    >REDIRECTING...</p>
+
+
+  </div>
 
 `;
 
@@ -686,9 +678,6 @@ const countdownExitBtn =
 // SYNC MUSIC BUTTON
 // ==============================
 
-// AuthBox থেকে মিউজিক চালু থাকলে
-// Countdown-এও 🔊 দেখাবে
-
 function syncCountdownMusicButton() {
 
   const isPlaying =
@@ -696,36 +685,124 @@ function syncCountdownMusicButton() {
     !audioPlayer.paused;
 
 
-  countdownMusicBtn.textContent =
-    isPlaying
-      ? "🔊"
-      : "🔇";
+  if (isPlaying) {
 
+    countdownMusicBtn.textContent =
+      "🔊";
 
-  countdownMusicBtn.style.color =
-    isPlaying
-      ? "#00ffcc"
-      : "#ff4444";
+    countdownMusicBtn.style.color =
+      "#00ffcc";
 
+    countdownMusicBtn.style.borderColor =
+      "#00ffcc";
 
-  countdownMusicBtn.style.borderColor =
-    isPlaying
-      ? "#00ffcc"
-      : "rgba(0,255,204,0.3)";
+    countdownMusicBtn.style.boxShadow =
+      "0 0 8px rgba(0,255,204,0.4)";
 
+  }
 
-  countdownMusicBtn.style.boxShadow =
-    isPlaying
-      ? "0 0 8px rgba(0,255,204,0.4)"
-      : "0 0 6px rgba(0,0,0,0.3)";
+  else {
+
+    countdownMusicBtn.textContent =
+      "🔇";
+
+    countdownMusicBtn.style.color =
+      "#ff4444";
+
+    countdownMusicBtn.style.borderColor =
+      "rgba(0,255,204,0.4)";
+
+    countdownMusicBtn.style.boxShadow =
+      "0 0 6px rgba(0,0,0,0.3)";
+
+  }
 
 }
 
 
-// Countdown শুরু হওয়ার সাথে সাথে
-// Music Icon Sync হবে
+// ==============================
+// INITIAL MUSIC SYNC
+// ==============================
+
+// AuthBox-এ Music চালু থাকলে
+// Countdown-এ 🔊 দেখাবে
 
 syncCountdownMusicButton();
+
+
+// ==============================
+// COMPLETE EXIT
+// ==============================
+
+function exitCountdown() {
+
+  if (countdownExited)
+    return;
+
+
+  countdownExited = true;
+
+
+  // STOP TIMER
+
+  if (timer) {
+
+    clearInterval(timer);
+
+    timer = null;
+
+  }
+
+
+  // STOP API REQUEST
+
+  apiController.abort();
+
+
+  // STOP MUSIC
+
+  if (audioPlayer) {
+
+    audioPlayer.pause();
+
+    audioPlayer.currentTime = 0;
+
+    audioPlayer.src = "";
+
+    audioPlayer = null;
+
+  }
+
+
+  // REMOVE ALL SCRIPT UI
+
+  document.querySelectorAll(
+
+    "#mehedy-auth-box, " +
+
+    "#mehedy-loading-overlay, " +
+
+    "#mehedy-countdown-overlay"
+
+  ).forEach(
+
+    el => el.remove()
+
+  );
+
+
+  // STOP SCRIPT
+
+  redirectUrl = "";
+
+  apiFinished = true;
+
+
+  console.log(
+    "SCRIPT COMPLETELY EXITED"
+  );
+
+}
 
 
 // ==============================
@@ -733,8 +810,11 @@ syncCountdownMusicButton();
 // ==============================
 
 countdownExitBtn.addEventListener(
+
   "click",
+
   exitCountdown
+
 );
 
 
@@ -743,19 +823,22 @@ countdownExitBtn.addEventListener(
 // ==============================
 
 countdownMusicBtn.addEventListener(
+
   "click",
 
   async () => {
+
 
     if (countdownExited)
       return;
 
 
     // ==========================
-    // AUDIO তৈরি করবে
+    // CREATE AUDIO IF NEEDED
     // ==========================
 
     if (!audioPlayer) {
+
 
       countdownMusicBtn.textContent =
         "⏳";
@@ -774,9 +857,9 @@ countdownMusicBtn.addEventListener(
         const res =
           await fetch(
 
-            CONFIG.m +
-            "?t=" +
-            Date.now(),
+            CONFIG.m
+            + "?t="
+            + Date.now(),
 
             {
               signal:
@@ -793,8 +876,15 @@ countdownMusicBtn.addEventListener(
 
 
         if (
-          audioUrl &&
-          audioUrl.startsWith("http")
+
+          audioUrl
+
+          &&
+
+          audioUrl.startsWith(
+            "http"
+          )
+
         ) {
 
           resolvedUrl =
@@ -803,7 +893,10 @@ countdownMusicBtn.addEventListener(
         }
 
 
-      } catch (err) {
+      }
+
+      catch (err) {
+
 
         if (countdownExited)
           return;
@@ -839,9 +932,11 @@ countdownMusicBtn.addEventListener(
 
     if (audioPlayer.paused) {
 
+
       audioPlayer.play()
 
         .then(() => {
+
 
           if (countdownExited)
             return;
@@ -851,21 +946,24 @@ countdownMusicBtn.addEventListener(
 
         })
 
-        .catch(err => {
-
-          if (countdownExited)
-            return;
+        .catch(
+          err => {
 
 
-          console.log(
-            "Playback failed:",
-            err
-          );
+            if (countdownExited)
+              return;
 
 
-          syncCountdownMusicButton();
+            console.log(
+              "Playback failed:",
+              err
+            );
 
-        });
+
+            syncCountdownMusicButton();
+
+          }
+        );
 
     }
 
@@ -876,7 +974,9 @@ countdownMusicBtn.addEventListener(
 
     else {
 
+
       audioPlayer.pause();
+
 
       syncCountdownMusicButton();
 
