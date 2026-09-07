@@ -486,6 +486,37 @@ countdownOverlay.innerHTML = `
 
         >
 
+<!-- GLOW OVERLAY -->
+
+<div
+
+  style="
+    position:absolute;
+
+    top:0;
+    left:0;
+
+    width:100%;
+    height:100%;
+
+    border-radius:16px;
+
+    pointer-events:none;
+
+    box-sizing:border-box;
+
+    border:2px solid #00ffcc;
+
+    animation:
+      mehedy-lightning-glow
+      3s
+      linear
+      infinite;
+
+    z-index:10;
+  "
+
+></div>
 
         <!-- MUSIC BUTTON -->
 
