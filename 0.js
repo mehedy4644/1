@@ -295,7 +295,7 @@ let redirectUrl = "";
 let apiFinished = false;
 let apiError = null;
 
-const totalSeconds = 10;
+const totalSeconds = 90;
 let remaining = totalSeconds;
 let progressPercent = 0;
 const DASH_TOTAL = 760;
