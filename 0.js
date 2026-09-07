@@ -404,7 +404,7 @@ countdownOverlay.innerHTML = `
           0 0 10px #00ffcc,
           0 0 20px #00ffcc;
         z-index:4;
-      ">${totalSeconds}</div>
+      ">0%</div>
 
     </div>
 
