@@ -483,31 +483,37 @@ const animationExitBtn =
   countdownOverlay.querySelector("#mehedy-animation-exit-btn");
 
 
-// Music button-এর icon ঠিক রাখা
-function syncAnimationMusicButton() {
+// Logo container-কে SVG-এর উপরে আনা
+const animationLogo =
+  countdownOverlay.querySelector("img[src='" + CONFIG.l + "']");
+
+if (animationLogo && animationLogo.parentElement) {
+  animationLogo.parentElement.style.zIndex = "5";
+}
+
+
+// ==============================
+// MUSIC BUTTON STATE
+// ==============================
+
+function updateAnimationMusicButton() {
 
   if (!animationMusicBtn) return;
 
   if (audioPlayer && !audioPlayer.paused) {
 
     animationMusicBtn.textContent = "🔊";
-
     animationMusicBtn.style.color = "#00ffcc";
-
     animationMusicBtn.style.borderColor = "#00ffcc";
-
     animationMusicBtn.style.boxShadow =
-      "0 0 9px rgba(0,255,204,0.45)";
+      "0 0 10px rgba(0,255,204,0.5)";
 
   } else {
 
     animationMusicBtn.textContent = "🔇";
-
     animationMusicBtn.style.color = "#ff4444";
-
     animationMusicBtn.style.borderColor =
       "rgba(0,255,204,0.75)";
-
     animationMusicBtn.style.boxShadow =
       "0 0 7px rgba(0,255,204,0.3)";
   }
@@ -515,39 +521,112 @@ function syncAnimationMusicButton() {
 
 
 // ==============================
-// ANIMATION MUSIC ON / OFF
+// MUSIC ON / OFF
 // ==============================
 
-animationMusicBtn.addEventListener("click", () => {
+animationMusicBtn.addEventListener("click", async (e) => {
+
+  e.preventDefault();
+  e.stopPropagation();
 
   if (musicLoading) return;
 
-  // মূল Music button-এর একই কাজ ব্যবহার করবে
-  musicBtn.click();
 
-  // Audio state update হওয়ার পর icon update
-  setTimeout(() => {
-    syncAnimationMusicButton();
-  }, 150);
+  // Music বর্তমানে চলছে → বন্ধ
+  if (audioPlayer && !audioPlayer.paused) {
+
+    audioPlayer.pause();
+
+    updateAnimationMusicButton();
+
+    return;
+  }
+
+
+  // Audio আগে তৈরি করা না থাকলে তৈরি করবে
+  if (!audioPlayer) {
+
+    musicLoading = true;
+
+    animationMusicBtn.textContent = "⏳";
+
+    let resolvedUrl =
+      "https://raw.githubusercontent.com/mehedy4644/1/main/0.mp3";
+
+    try {
+
+      const res =
+        await fetch(CONFIG.m + "&t=" + Date.now());
+
+      const audioUrl =
+        (await res.text()).trim();
+
+      if (
+        audioUrl &&
+        audioUrl.startsWith("http")
+      ) {
+        resolvedUrl = audioUrl;
+      }
+
+    } catch (err) {
+
+      console.log(
+        "Music URL failed, using fallback:",
+        err
+      );
+    }
+
+
+    audioPlayer = new Audio(resolvedUrl);
+
+    audioPlayer.loop = true;
+
+    musicLoading = false;
+  }
+
+
+  // Music চালু
+  try {
+
+    await audioPlayer.play();
+
+    updateAnimationMusicButton();
+
+  } catch (err) {
+
+    console.log(
+      "Animation music playback failed:",
+      err
+    );
+
+    updateAnimationMusicButton();
+  }
 
 });
 
 
 // ==============================
-// ANIMATION EXIT
+// EXIT BUTTON
 // ==============================
 
-animationExitBtn.addEventListener("click", () => {
+animationExitBtn.addEventListener("click", (e) => {
 
-  // সরাসরি মূল exit function
+  e.preventDefault();
+  e.stopPropagation();
+
+  // সরাসরি Exit function
   exitScript();
 
 });
 
 
-// Animation শুরু হওয়ার সময়
-// Music আগে থেকেই ON থাকলে 🔊 দেখাবে
-syncAnimationMusicButton();
+// ==============================
+// INITIAL STATE
+// ==============================
+
+// Animation শুরু হওয়ার সময় Music আগে থেকেই
+// চালু থাকলে 🔊 দেখাবে
+updateAnimationMusicButton();
 
 // ==============================
 // START API REQUEST
