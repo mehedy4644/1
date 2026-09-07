@@ -335,50 +335,6 @@ countdownOverlay.innerHTML = `
       justify-content:center;
     ">
 
-      <!-- LEFT MUSIC BUTTON -->
-      <button id="mehedy-animation-music-btn" style="
-        position:absolute;
-        left:2px;
-        top:50%;
-        transform:translateY(-50%);
-        width:28px;
-        height:28px;
-        padding:0;
-        border-radius:50%;
-        background:rgba(3,7,18,0.90);
-        border:1px solid rgba(0,255,204,0.7);
-        color:#ff4444;
-        font-size:12px;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        cursor:pointer;
-        z-index:10;
-        box-shadow:0 0 8px rgba(0,255,204,0.25);
-      ">🔇</button>
-
-      <!-- RIGHT EXIT BUTTON -->
-      <button id="mehedy-animation-exit-btn" style="
-        position:absolute;
-        right:2px;
-        top:50%;
-        transform:translateY(-50%);
-        width:28px;
-        height:28px;
-        padding:0;
-        border-radius:50%;
-        background:rgba(3,7,18,0.90);
-        border:1px solid rgba(255,68,68,0.7);
-        color:#ff4444;
-        font-size:13px;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        cursor:pointer;
-        z-index:10;
-        box-shadow:0 0 8px rgba(255,68,68,0.25);
-      ">❌</button>
-
       <svg width="240" height="240"
            style="transform:rotate(0deg);
                   position:relative;
@@ -425,6 +381,54 @@ countdownOverlay.innerHTML = `
         z-index:2;
       ">
 
+        <!-- MUSIC BUTTON -->
+        <button id="mehedy-animation-music-btn" style="
+          position:absolute;
+          top:9px;
+          left:9px;
+          width:25px;
+          height:25px;
+          padding:0;
+          margin:0;
+          border-radius:50%;
+          background:rgba(3,7,18,0.88);
+          border:1px solid rgba(0,255,204,0.75);
+          color:#ff4444;
+          font-size:11px;
+          line-height:23px;
+          text-align:center;
+          cursor:pointer;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          z-index:10;
+          box-shadow:0 0 7px rgba(0,255,204,0.3);
+        ">🔇</button>
+
+        <!-- EXIT BUTTON -->
+        <button id="mehedy-animation-exit-btn" style="
+          position:absolute;
+          top:9px;
+          right:9px;
+          width:25px;
+          height:25px;
+          padding:0;
+          margin:0;
+          border-radius:50%;
+          background:rgba(3,7,18,0.88);
+          border:1px solid rgba(255,68,68,0.75);
+          color:#ff4444;
+          font-size:12px;
+          line-height:23px;
+          text-align:center;
+          cursor:pointer;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          z-index:10;
+          box-shadow:0 0 7px rgba(255,68,68,0.25);
+        ">❌</button>
+
         <img src="${CONFIG.l}" style="
           width:100%;
           height:100%;
@@ -469,7 +473,7 @@ countdownOverlay.innerHTML = `
 document.body.appendChild(countdownOverlay);
 
 // ==============================
-// ANIMATION BUTTONS
+// COUNTDOWN ANIMATION BUTTONS
 // ==============================
 
 const animationMusicBtn =
@@ -479,7 +483,7 @@ const animationExitBtn =
   countdownOverlay.querySelector("#mehedy-animation-exit-btn");
 
 
-// Music-এর বর্তমান অবস্থা Logo-এর পাশের button-এ দেখাবে
+// Music button-এর icon ঠিক রাখা
 function syncAnimationMusicButton() {
 
   if (!animationMusicBtn) return;
@@ -487,33 +491,41 @@ function syncAnimationMusicButton() {
   if (audioPlayer && !audioPlayer.paused) {
 
     animationMusicBtn.textContent = "🔊";
+
     animationMusicBtn.style.color = "#00ffcc";
+
     animationMusicBtn.style.borderColor = "#00ffcc";
+
     animationMusicBtn.style.boxShadow =
-      "0 0 10px rgba(0,255,204,0.45)";
+      "0 0 9px rgba(0,255,204,0.45)";
 
   } else {
 
     animationMusicBtn.textContent = "🔇";
+
     animationMusicBtn.style.color = "#ff4444";
+
     animationMusicBtn.style.borderColor =
-      "rgba(0,255,204,0.7)";
+      "rgba(0,255,204,0.75)";
+
     animationMusicBtn.style.boxShadow =
-      "0 0 8px rgba(0,255,204,0.25)";
+      "0 0 7px rgba(0,255,204,0.3)";
   }
 }
 
 
-// Animation চলাকালীন Music ON / OFF
+// ==============================
+// ANIMATION MUSIC ON / OFF
+// ==============================
+
 animationMusicBtn.addEventListener("click", () => {
 
   if (musicLoading) return;
 
-  // AuthBox-এর আসল Music button-এর
-  // একই functionality ব্যবহার করবে
+  // মূল Music button-এর একই কাজ ব্যবহার করবে
   musicBtn.click();
 
-  // Audio state update হওয়ার পর icon update
+  // Audio state update হওয়ার পর icon update
   setTimeout(() => {
     syncAnimationMusicButton();
   }, 150);
@@ -521,17 +533,20 @@ animationMusicBtn.addEventListener("click", () => {
 });
 
 
-// Animation চলাকালীন Exit
+// ==============================
+// ANIMATION EXIT
+// ==============================
+
 animationExitBtn.addEventListener("click", () => {
 
-  // AuthBox-এর আসল Exit functionality ব্যবহার করবে
-  exitBtn.click();
+  // সরাসরি মূল exit function
+  exitScript();
 
 });
 
 
-// Animation শুরু হওয়ার সময়
-// আগে Music চালু থাকলে 🔊 দেখাবে
+// Animation শুরু হওয়ার সময়
+// Music আগে থেকেই ON থাকলে 🔊 দেখাবে
 syncAnimationMusicButton();
 
 // ==============================
