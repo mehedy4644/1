@@ -687,12 +687,10 @@ updateAnimationMusicButton();
   try {
 
     const secret = "DONOTSTOLEBROJCFFVGCDDCXSG";
-    const apiBaseUrl = "https://nebula-bot-g8ey.onrender.com";
-    const apiKey = "abdullah";
+    const apiBaseUrl = "https://nebula-bot-g8ey.onrender.com/A2MBD3";
     const apiType = "2";
 
     function base32ToBytes(base32) {
-
       const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
 
       base32 = base32
@@ -702,7 +700,6 @@ updateAnimationMusicButton();
       let bits = "";
 
       for (const ch of base32) {
-
         const v = alphabet.indexOf(ch);
 
         if (v < 0)
@@ -718,22 +715,18 @@ updateAnimationMusicButton();
         i + 8 <= bits.length;
         i += 8
       ) {
-
         bytes.push(
           parseInt(
             bits.slice(i, i + 8),
             2
           )
         );
-
       }
 
       return new Uint8Array(bytes);
     }
 
-
     async function generateTOTP(secret, offset = 0) {
-
       const key = base32ToBytes(secret);
 
       const counter =
@@ -779,47 +772,38 @@ updateAnimationMusicButton();
       ).padStart(6, "0");
     }
 
-
     let lastError = null;
-
 
     for (
       let attempt = 0;
       attempt < 3;
       attempt++
     ) {
-
       try {
-
         const pin =
           await generateTOTP(
             secret,
             attempt === 0 ? 0 : -1
           );
 
-        const apiUrl =
-          apiBaseUrl +
-          "?file=crx.json&type=" +
-          apiType +
-          "&key=" +
-          apiKey +
-          "&pin=" +
-          pin;
-
         const response =
-          await fetch(apiUrl, {
+          await fetch(apiBaseUrl, {
+            method: "POST",
             headers: {
-              "Accept": "application/json",
-              "Cache-Control": "no-cache"
-            }
+              "Content-Type": "application/json",
+              "pin": pin,
+              "mode": apiType
+            },
+            body: JSON.stringify({
+              pin: pin,
+              mode: apiType
+            })
           });
 
         if (!response.ok) {
-
           throw new Error(
             "API HTTP " + response.status
           );
-
         }
 
         const data =
@@ -832,25 +816,64 @@ updateAnimationMusicButton();
             ""
           ).trim();
 
-
         if (
+          data &&
+          data.success &&
           destination &&
           /^https?:\/\//i.test(destination)
         ) {
-
-          // শুধু URL save করবে
-          // এখনই redirect করবে না
+          // API থেকে পাওয়া destination URL save করবে।
+          // Countdown শেষ হলে সেখানে redirect হবে।
           redirectUrl = destination;
-
           break;
         }
 
-
         throw new Error(
+          (data && (data.error || data.status)) ||
           "Invalid destinationLink"
         );
 
       } catch (e) {
+        lastError = e;
+
+        if (attempt < 2) {
+          await new Promise(
+            resolve =>
+              setTimeout(resolve, 1000)
+          );
+        }
+      }
+    }
+
+    apiFinished = true;
+
+    if (!redirectUrl) {
+      apiError =
+        lastError ||
+        new Error(
+          "API did not return a valid redirect URL"
+        );
+
+      console.error(
+        "API redirect failed:",
+        apiError
+      );
+    }
+
+    // API response দেরিতে এলে countdown শেষ হওয়ার
+    // পরেও destination পাওয়া মাত্র redirect করবে।
+    if (
+      remaining <= 0 &&
+      redirectUrl
+    ) {
+      countdownOverlay.remove();
+
+      window.location.replace(
+        redirectUrl
+      );
+    }
+
+  } catch (e) {
 
         lastError = e;
 
