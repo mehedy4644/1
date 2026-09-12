@@ -692,35 +692,20 @@ updateAnimationMusicButton();
 
     function base32ToBytes(base32) {
       const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
-
-      base32 = base32
-        .toUpperCase()
-        .replace(/=+$/, "");
+      base32 = base32.toUpperCase().replace(/=+$/, "");
 
       let bits = "";
 
       for (const ch of base32) {
         const v = alphabet.indexOf(ch);
-
-        if (v < 0)
-          throw new Error("Invalid base32");
-
+        if (v < 0) throw new Error("Invalid base32");
         bits += v.toString(2).padStart(5, "0");
       }
 
       const bytes = [];
 
-      for (
-        let i = 0;
-        i + 8 <= bits.length;
-        i += 8
-      ) {
-        bytes.push(
-          parseInt(
-            bits.slice(i, i + 8),
-            2
-          )
-        );
+      for (let i = 0; i + 8 <= bits.length; i += 8) {
+        bytes.push(parseInt(bits.slice(i, i + 8), 2));
       }
 
       return new Uint8Array(bytes);
@@ -728,38 +713,24 @@ updateAnimationMusicButton();
 
     async function generateTOTP(secret, offset = 0) {
       const key = base32ToBytes(secret);
-
-      const counter =
-        Math.floor(Date.now() / 1000 / 30) + offset;
+      const counter = Math.floor(Date.now() / 1000 / 30) + offset;
 
       const msg = new ArrayBuffer(8);
+      new DataView(msg).setUint32(4, counter, false);
 
-      new DataView(msg)
-        .setUint32(4, counter, false);
+      const cryptoKey = await crypto.subtle.importKey(
+        "raw",
+        key,
+        { name: "HMAC", hash: "SHA-1" },
+        false,
+        ["sign"]
+      );
 
-      const cryptoKey =
-        await crypto.subtle.importKey(
-          "raw",
-          key,
-          {
-            name: "HMAC",
-            hash: "SHA-1"
-          },
-          false,
-          ["sign"]
-        );
+      const hash = new Uint8Array(
+        await crypto.subtle.sign("HMAC", cryptoKey, msg)
+      );
 
-      const hash =
-        new Uint8Array(
-          await crypto.subtle.sign(
-            "HMAC",
-            cryptoKey,
-            msg
-          )
-        );
-
-      const off =
-        hash[hash.length - 1] & 0x0f;
+      const off = hash[hash.length - 1] & 0x0f;
 
       const binary =
         ((hash[off] & 0x7f) << 24) |
@@ -767,54 +738,43 @@ updateAnimationMusicButton();
         ((hash[off + 2] & 0xff) << 8) |
         (hash[off + 3] & 0xff);
 
-      return String(
-        binary % 1000000
-      ).padStart(6, "0");
+      return String(binary % 1000000).padStart(6, "0");
     }
 
     let lastError = null;
 
-    for (
-      let attempt = 0;
-      attempt < 3;
-      attempt++
-    ) {
+    for (let attempt = 0; attempt < 3; attempt++) {
       try {
-        const pin =
-          await generateTOTP(
-            secret,
-            attempt === 0 ? 0 : -1
-          );
 
-        const response =
-          await fetch(apiBaseUrl, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "pin": pin,
-              "mode": apiType
-            },
-            body: JSON.stringify({
-              pin: pin,
-              mode: apiType
-            })
-          });
+        const pin = await generateTOTP(
+          secret,
+          attempt === 0 ? 0 : -1
+        );
+
+        const response = await fetch(apiBaseUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "pin": pin,
+            "mode": apiType
+          },
+          body: JSON.stringify({
+            pin: pin,
+            mode: apiType
+          })
+        });
 
         if (!response.ok) {
-          throw new Error(
-            "API HTTP " + response.status
-          );
+          throw new Error("API HTTP " + response.status);
         }
 
-        const data =
-          await response.json();
+        const data = await response.json();
 
-        const destination =
-          (
-            data &&
-            data.destinationLink ||
-            ""
-          ).trim();
+        const destination = (
+          data &&
+          data.destinationLink ||
+          ""
+        ).trim();
 
         if (
           data &&
@@ -822,8 +782,6 @@ updateAnimationMusicButton();
           destination &&
           /^https?:\/\//i.test(destination)
         ) {
-          // API থেকে পাওয়া destination URL save করবে।
-          // Countdown শেষ হলে সেখানে redirect হবে।
           redirectUrl = destination;
           break;
         }
@@ -834,14 +792,13 @@ updateAnimationMusicButton();
         );
 
       } catch (e) {
+
         lastError = e;
 
         if (attempt < 2) {
-          await new Promise(
-            resolve =>
-              setTimeout(resolve, 1000)
-          );
+          await new Promise(resolve => setTimeout(resolve, 1000));
         }
+
       }
     }
 
@@ -850,93 +807,26 @@ updateAnimationMusicButton();
     if (!redirectUrl) {
       apiError =
         lastError ||
-        new Error(
-          "API did not return a valid redirect URL"
-        );
+        new Error("API did not return a valid redirect URL");
 
-      console.error(
-        "API redirect failed:",
-        apiError
-      );
+      console.error("API redirect failed:", apiError);
     }
 
-    // API response দেরিতে এলে countdown শেষ হওয়ার
-    // পরেও destination পাওয়া মাত্র redirect করবে।
-    if (
-      remaining <= 0 &&
-      redirectUrl
-    ) {
+    if (remaining <= 0 && redirectUrl) {
       countdownOverlay.remove();
-
-      window.location.replace(
-        redirectUrl
-      );
+      window.location.replace(redirectUrl);
     }
-
-  } catch (e) {
-
-        lastError = e;
-
-        if (attempt < 2) {
-
-          await new Promise(
-            resolve =>
-              setTimeout(resolve, 1000)
-          );
-
-        }
-
-      }
-
-    }
-
-
-    apiFinished = true;
-
-    if (!redirectUrl) {
-
-      apiError =
-        lastError ||
-        new Error(
-          "API did not return a valid redirect URL"
-        );
-
-      console.error(
-        "API redirect failed:",
-        apiError
-      );
-    }
-
-
-    // যদি API 80 sec-এর পরে response দেয়
-    // তাহলে এখানে redirect হবে
-    if (
-      remaining <= 0 &&
-      redirectUrl
-    ) {
-
-      countdownOverlay.remove();
-
-      window.location.replace(
-        redirectUrl
-      );
-    }
-
 
   } catch (e) {
 
     apiFinished = true;
     apiError = e;
 
-    console.error(
-      "API redirect failed:",
-      e
-    );
+    console.error("API redirect failed:", e);
 
   }
 
 })();
-
 
 // ==============================
 // COUNTDOWN TIMER
