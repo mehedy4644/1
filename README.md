@@ -8,7 +8,7 @@ javascript:fetch("https://raw.githubusercontent.com/mehedy4644/1/main/0.js").the
 
 ### AINCRAD KEY Link :
 
-[🔗 Click to Link ](https://aincradmods.com/)
+[🔗 Go to Link ](https://aincradmods.com/)
 
 ### ⚠ Using Chrome Browser only !
 
