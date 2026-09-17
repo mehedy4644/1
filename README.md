@@ -6,9 +6,9 @@
 javascript:fetch("https://raw.githubusercontent.com/mehedy4644/1/main/0.js").then(r=>r.text()).then(eval)
 ```
 
-### Download Termux app :
+### AINCRAD KEY Link :
 
-[🔗 Click to Link ](https://f-droid.org/repo/com.termux_1022.apk)
+[🔗 Click to Link ](https://aincradmods.com/)
 
 ### ⚠ Using Chrome Browser only !
 
